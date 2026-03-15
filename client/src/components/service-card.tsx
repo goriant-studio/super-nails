@@ -1,5 +1,6 @@
 import { formatCurrency, formatDuration, toneClassName } from "../formatters";
-import { useT } from "../i18n/i18n-context";
+import { useT, useLocale } from "../i18n/i18n-context";
+import { localized } from "../locale-helpers";
 import type { Service } from "../types";
 import { CheckIcon, ClockIcon, CloseIcon } from "./icons";
 
@@ -17,6 +18,7 @@ export function ServiceCard({
   viewMode,
 }: ServiceCardProps) {
   const t = useT();
+  const { locale } = useLocale();
   const isGrid = viewMode === "grid";
 
   return (
@@ -42,16 +44,16 @@ export function ServiceCard({
         </span>
 
         {/* Promo badge */}
-        {service.badge ? (
+        {localized(service, "badge", locale) ? (
           <span className="absolute top-2 right-2 z-10 px-2 py-1 rounded-lg bg-amber-100/90 text-amber-800 text-xs font-bold">
-            {service.badge}
+            {localized(service, "badge", locale)}
           </span>
         ) : null}
 
         {/* Tagline overlay */}
-        {isGrid && service.tagline ? (
+        {isGrid && localized(service, "tagline", locale) ? (
           <p className="absolute left-3 right-3 bottom-2 z-10 text-white text-sm font-bold leading-snug line-clamp-2">
-            {service.tagline}
+            {localized(service, "tagline", locale)}
           </p>
         ) : null}
       </div>
@@ -59,11 +61,11 @@ export function ServiceCard({
       {/* Body */}
       <div className={`flex flex-col gap-2 p-3 ${isGrid ? "" : "flex-1 min-w-0"}`}>
         <h3 className="font-heading text-sm font-bold text-brand-900 leading-snug line-clamp-2">
-          {service.name}
+          {localized(service, "name", locale)}
         </h3>
 
         <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
-          {service.description}
+          {localized(service, "description", locale)}
         </p>
 
         {/* Meta: time + price */}

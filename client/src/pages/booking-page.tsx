@@ -7,8 +7,8 @@ import { MobileShell } from "../components/MobileShell";
 import { PaymentSection } from "../components/payment-section";
 import { TipSelector } from "../components/tip-selector";
 import { TimeSlotButton } from "../components/TimeSlotButton";
-import { useT } from "../i18n/i18n-context";
-import { useLocale } from "../i18n/i18n-context";
+import { useT, useLocale } from "../i18n/i18n-context";
+import { localized } from "../locale-helpers";
 import {
   formatAvailabilityHint,
   formatCurrency,
@@ -340,7 +340,7 @@ export function BookingPage() {
                     key={service.id}
                   >
                     <span className="text-sm text-brand-900 truncate">
-                      {service.name}
+                      {localized(service, "name", locale)}
                     </span>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <strong className="text-sm font-bold text-brand-700">
