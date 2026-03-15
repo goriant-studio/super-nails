@@ -1,6 +1,7 @@
 import { formatCurrency, formatDuration, toneClassName } from "../formatters";
+import { useT } from "../i18n/i18n-context";
 import type { Service } from "../types";
-import { CheckIcon, ClockIcon } from "./icons";
+import { CheckIcon, ClockIcon, CloseIcon } from "./icons";
 
 interface ServiceCardProps {
   service: Service;
@@ -15,6 +16,7 @@ export function ServiceCard({
   onToggle,
   viewMode,
 }: ServiceCardProps) {
+  const t = useT();
   const isGrid = viewMode === "grid";
 
   return (
@@ -68,18 +70,18 @@ export function ServiceCard({
         <div className="flex items-center justify-between gap-2 mt-auto">
           <span className="inline-flex items-center gap-1 text-xs text-gray-400">
             <ClockIcon width={13} height={13} />
-            {service.durationMinutes} phút
+            {service.durationMinutes} min
           </span>
           <strong className="text-sm font-bold text-brand-700">
             {formatCurrency(service.price)}
           </strong>
         </div>
 
-        {/* Select button */}
+        {/* Select / Deselect button */}
         <button
           className={`w-full flex items-center justify-center gap-1.5 py-2.5 rounded-button text-xs font-bold transition-all active:scale-95 ${
             selected
-              ? "bg-accent-green text-white"
+              ? "bg-accent-rose/10 text-accent-rose border border-accent-rose/30 hover:bg-accent-rose/20"
               : "bg-brand-700 text-white shadow-sm hover:bg-brand-600"
           }`}
           onClick={() => onToggle(service.id)}
@@ -87,11 +89,14 @@ export function ServiceCard({
         >
           {selected ? (
             <>
-              <CheckIcon width={14} height={14} />
-              Đã chọn
+              <CloseIcon width={14} height={14} />
+              {t("services.deselect")}
             </>
           ) : (
-            "Chọn"
+            <>
+              <CheckIcon width={14} height={14} />
+              {t("services.select")}
+            </>
           )}
         </button>
       </div>

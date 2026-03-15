@@ -6,6 +6,8 @@ import { BookingProvider } from "./booking-context";
 import { I18nProvider, useT, useLocale } from "./i18n/i18n-context";
 import { HomePage } from "./pages/home-page";
 import { BookingPage } from "./pages/booking-page";
+import { SuccessPage } from "./pages/success-page";
+import { BookingDetailPage } from "./pages/booking-detail-page";
 import { SalonPage } from "./pages/salon-page";
 import { ServicesPage } from "./pages/services-page";
 import { TourPage } from "./pages/tour-page";
@@ -105,6 +107,8 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/booking" element={<BookingPage />} />
+        <Route path="/booking/success" element={<SuccessPage />} />
+        <Route path="/booking/:id" element={<BookingDetailPage />} />
         <Route path="/salons" element={<SalonPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/tour/:bookingId" element={<TourPage />} />
