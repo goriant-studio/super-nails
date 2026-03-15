@@ -1,0 +1,10 @@
+name = "super-nails-api"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+routes = [
+  { pattern = "super-nails.goriant.com/api/*", zone_name = "goriant.com" }
+]
+
+[vars]
+# SPACETIMEDB_TOKEN is set via: wrangler secret put SPACETIMEDB_TOKEN

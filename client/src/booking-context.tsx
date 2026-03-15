@@ -7,7 +7,7 @@ import {
   type ReactNode
 } from "react";
 
-import { submitBookingRequest } from "./api";
+import { fetchSlots, submitBookingRequest } from "./api";
 import type {
   BookingPayload,
   BootstrapData,
@@ -58,6 +58,7 @@ interface BookingContextValue {
   availableStylists: Stylist[];
   availableDates: string[];
   slotsForSelectedDate: TimeSlot[];
+  slotsLoading: boolean;
   needsConsultation: boolean;
   submitting: boolean;
   submissionError: string | null;
@@ -98,18 +99,16 @@ function getInitialSalonId(data: BootstrapData, stored: StoredBookingState | nul
   return data.salons[0]?.id ?? null;
 }
 
-function getSalonDates(data: BootstrapData, salonId: number | null) {
-  if (!salonId) {
-    return [];
+/** Generate next 6 available dates from today (VN time, UTC+7). */
+function getNextSixDates(): string[] {
+  const dates: string[] = [];
+  const now = new Date(Date.now() + 7 * 3600 * 1000);
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(now);
+    d.setUTCDate(now.getUTCDate() + i);
+    dates.push(d.toISOString().slice(0, 10));
   }
-
-  return Array.from(
-    new Set(
-      data.timeSlots
-        .filter((slot) => slot.salonId === salonId)
-        .map((slot) => slot.date)
-    )
-  ).sort();
+  return dates;
 }
 
 export function BookingProvider({
@@ -137,16 +136,15 @@ export function BookingProvider({
   const [submitting, setSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<ConfirmedBooking | null>(null);
+  const [slotsForSelectedDate, setSlotsForSelectedDate] = useState<TimeSlot[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
   const selectedSalon =
     data.salons.find((salon) => salon.id === selectedSalonId) ?? null;
   const availableStylists = data.stylists.filter(
     (stylist) => stylist.salonId === selectedSalonId
   );
-  const availableDates = getSalonDates(data, selectedSalonId);
-  const slotsForSelectedDate = data.timeSlots.filter(
-    (slot) => slot.salonId === selectedSalonId && slot.date === selectedDate
-  );
+  const availableDates = selectedSalonId ? getNextSixDates() : [];
   const selectedStylist =
     availableStylists.find((stylist) => stylist.id === selectedStylistId) ?? null;
   const selectedServices = data.services.filter((service) =>
@@ -200,6 +198,19 @@ export function BookingProvider({
       setSelectedTime(null);
     }
   }, [selectedTime, slotsForSelectedDate]);
+
+  // Fetch slots whenever salon or date changes
+  useEffect(() => {
+    if (!selectedSalonId || !selectedDate) {
+      setSlotsForSelectedDate([]);
+      return;
+    }
+    setSlotsLoading(true);
+    fetchSlots(selectedSalonId, selectedDate)
+      .then(setSlotsForSelectedDate)
+      .catch(() => setSlotsForSelectedDate([]))
+      .finally(() => setSlotsLoading(false));
+  }, [selectedSalonId, selectedDate]);
 
   useEffect(() => {
     const payload: StoredBookingState = {
@@ -338,6 +349,7 @@ export function BookingProvider({
         availableStylists,
         availableDates,
         slotsForSelectedDate,
+        slotsLoading,
         needsConsultation,
         submitting,
         submissionError,
