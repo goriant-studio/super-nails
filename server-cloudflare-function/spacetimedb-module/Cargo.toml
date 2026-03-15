@@ -7,7 +7,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-spacetimedb = "0.12"
+spacetimedb = "1.5"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 log = "0.4"
