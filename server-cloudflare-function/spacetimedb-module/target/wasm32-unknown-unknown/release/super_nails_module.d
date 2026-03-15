@@ -1,1 +1,0 @@
-/Users/lamle/Development/SuperNails/server-cloudflare-function/spacetimedb-module/target/wasm32-unknown-unknown/release/super_nails_module.wasm: /Users/lamle/Development/SuperNails/server-cloudflare-function/spacetimedb-module/src/lib.rs
