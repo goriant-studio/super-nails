@@ -20,7 +20,7 @@ export function SalonPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
-  const [nearbyOnly, setNearbyOnly] = useState(true);
+  const [nearbyOnly, setNearbyOnly] = useState(false);
   const [parkingOnly, setParkingOnly] = useState(false);
   const [premiumOnly, setPremiumOnly] = useState(false);
 
@@ -130,7 +130,7 @@ export function SalonPage() {
               className={`px-3.5 py-2 rounded-chip text-sm font-semibold transition-all active:scale-95 ${
                 selectedProvince === null
                   ? "bg-brand-700 text-white shadow-button"
-                  : "bg-brand-200 text-white"
+                  : "bg-white text-gray-600 border border-gray-200"
               }`}
               onClick={() => setSelectedProvince(null)}
               type="button"
@@ -143,7 +143,7 @@ export function SalonPage() {
                 className={`px-3.5 py-2 rounded-chip text-sm font-semibold transition-all active:scale-95 ${
                   selectedProvince === province.name
                     ? "bg-brand-700 text-white shadow-button"
-                    : "bg-brand-200 text-white"
+                    : "bg-white text-gray-600 border border-gray-200"
                 }`}
                 onClick={() =>
                   setSelectedProvince((current) =>

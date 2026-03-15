@@ -7,7 +7,7 @@ import { FilterChip } from "../components/FilterChip";
 import { MobileShell } from "../components/MobileShell";
 import { ServiceCard } from "../components/service-card";
 import { StickySummaryBar } from "../components/StickySummaryBar";
-import { CheckIcon, GridIcon, SearchIcon } from "../components/icons";
+import { CheckIcon, SearchIcon } from "../components/icons";
 import { SectionHeader } from "../components/SectionHeader";
 
 export function ServicesPage() {
@@ -23,7 +23,6 @@ export function ServicesPage() {
   } = useBooking();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const visibleCategories = useMemo(() => {
     return data.categories.filter((category) => {
@@ -46,28 +45,9 @@ export function ServicesPage() {
 
   return (
     <MobileShell>
-      <AppHeader
-        title="Chọn dịch vụ"
-        actions={
-          <div className="flex items-center gap-2">
-            <button
-              className="flex items-center gap-1.5 px-3 py-2 rounded-button bg-white text-brand-700 text-xs font-semibold border border-brand-200 active:scale-95 transition-all"
-              onClick={() =>
-                setViewMode((c) => (c === "grid" ? "list" : "grid"))
-              }
-              type="button"
-            >
-              <GridIcon width={14} height={14} />
-              Kiểu xem
-            </button>
-            <span className="w-9 h-9 flex items-center justify-center rounded-button bg-white text-red-600 text-xs font-bold border border-gray-200 shadow-card">
-              VN
-            </span>
-          </div>
-        }
-      />
+      <AppHeader title="Chọn dịch vụ" />
 
-      <main className="px-4 py-4 pb-36">
+      <main className="px-4 py-4 pb-40">
         {/* Search */}
         <div className="flex items-center gap-3 px-4 py-3 rounded-card-lg bg-white shadow-card border border-surface-border">
           <SearchIcon width={20} height={20} className="text-gray-400 flex-shrink-0" />
@@ -117,20 +97,14 @@ export function ServicesPage() {
                 {category.teaser}
               </p>
 
-              <div
-                className={`grid gap-3 ${
-                  viewMode === "grid"
-                    ? "grid-cols-2"
-                    : "grid-cols-1"
-                }`}
-              >
+              <div className="grid grid-cols-2 gap-3">
                 {services.map((service) => (
                   <ServiceCard
                     key={service.id}
                     onToggle={toggleService}
                     selected={selectedServiceIds.includes(service.id)}
                     service={service}
-                    viewMode={viewMode}
+                    viewMode="grid"
                   />
                 ))}
               </div>
@@ -148,24 +122,13 @@ export function ServicesPage() {
           />
           <span>
             <strong className="block text-sm font-bold text-brand-700">
-              Anh không biết chọn dịch vụ gì?
+              Chưa biết chọn dịch vụ gì?
             </strong>
             <small className="block text-xs text-gray-400 mt-1">
-              Nhân viên sẽ giúp anh chọn dịch vụ phù hợp tại cửa hàng.
+              Nhân viên sẽ giúp bạn chọn dịch vụ phù hợp tại cửa hàng.
             </small>
           </span>
         </label>
-
-        {/* Offers */}
-        <div className="flex items-center justify-between gap-3 mt-4 text-brand-700">
-          <span className="text-sm font-bold">Ưu đãi của anh</span>
-          <button
-            className="px-3 py-1.5 rounded-button bg-white text-brand-700 text-xs font-semibold border border-brand-200"
-            type="button"
-          >
-            Chọn ưu đãi
-          </button>
-        </div>
       </main>
 
       {/* Sticky summary bar */}

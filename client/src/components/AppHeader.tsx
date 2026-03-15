@@ -6,6 +6,9 @@ import { ArrowLeftIcon, HomeIcon } from "./icons";
 interface AppHeaderProps {
   title: string;
   leading?: "home" | "back";
+  /** Optional fallback route when back has no in-app history (direct-entry / deep link). */
+  leadingFallbackTo?: string;
+  /** Runs as a side effect *before* navigation — does NOT override the navigate action. */
   onLeadingClick?: () => void;
   actions?: ReactNode;
 }
@@ -13,23 +16,28 @@ interface AppHeaderProps {
 export function AppHeader({
   title,
   leading = "back",
+  leadingFallbackTo,
   onLeadingClick,
   actions,
 }: AppHeaderProps) {
   const navigate = useNavigate();
 
   const handleLeadingClick = () => {
-    if (onLeadingClick) {
-      onLeadingClick();
-      return;
-    }
+    // Run caller side effect first (e.g. clear transient state)
+    onLeadingClick?.();
 
     if (leading === "home") {
       navigate("/");
       return;
     }
 
-    navigate(-1);
+    // Safe back: use browser history when available, otherwise fallback
+    const historyIndex = (window.history.state as { idx?: number } | null)?.idx;
+    if (historyIndex != null && historyIndex > 0) {
+      navigate(-1);
+    } else {
+      navigate(leadingFallbackTo ?? "/");
+    }
   };
 
   return (

@@ -108,6 +108,7 @@ export function BookingPage() {
         title="Đặt lịch giữ chỗ"
         leading="home"
         onLeadingClick={() => clearConfirmation()}
+        leadingFallbackTo="/"
       />
 
       <main className="px-4 py-4 pb-8">
@@ -115,10 +116,10 @@ export function BookingPage() {
         <div className="flex items-center justify-between p-4 rounded-card-lg bg-gradient-to-br from-brand-50 to-white border border-brand-100 mb-4">
           <div>
             <span className="inline-flex px-2.5 py-1 rounded-chip bg-brand-100 text-brand-700 text-[10px] font-bold uppercase tracking-wider">
-              PWA + SQLite
+              Đặt lịch giữ chỗ
             </span>
             <p className="text-sm font-semibold text-gray-500 mt-2">
-              Mobile-first booking
+              Chọn salon, stylist và dịch vụ yêu thích
             </p>
           </div>
           <div className="w-11 h-11 flex items-center justify-center rounded-card bg-brand-700 text-white shadow-button">
@@ -137,7 +138,7 @@ export function BookingPage() {
                 {confirmation.confirmationCode}
               </h3>
               <p className="text-sm text-gray-600 mt-0.5">
-                {selectedSalon?.name} lúc {selectedTime || "--"}
+                {confirmation.salonName} lúc {confirmation.appointmentTime}
               </p>
             </div>
             <button

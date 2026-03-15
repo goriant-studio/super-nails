@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
   useContext,
@@ -8,7 +9,6 @@ import {
 
 import { submitBookingRequest } from "./api";
 import type {
-  BookingConfirmation,
   BookingPayload,
   BootstrapData,
   Salon,
@@ -18,6 +18,19 @@ import type {
 } from "./types";
 
 const STORAGE_KEY = "super-nails-booking";
+
+/** Client-only snapshot captured at submission time so the banner survives data refresh. */
+export interface ConfirmedBooking {
+  bookingId: number;
+  confirmationCode: string;
+  totalAmount: number;
+  salonName: string;
+  stylistName: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  serviceNames: string[];
+  needsConsultation: boolean;
+}
 
 interface StoredBookingState {
   selectedSalonId: number | null;
@@ -48,7 +61,7 @@ interface BookingContextValue {
   needsConsultation: boolean;
   submitting: boolean;
   submissionError: string | null;
-  confirmation: BookingConfirmation | null;
+  confirmation: ConfirmedBooking | null;
   chooseSalon: (salonId: number) => void;
   chooseStylist: (stylistId: number) => void;
   chooseDate: (date: string) => void;
@@ -72,7 +85,7 @@ function readStoredBookingState(): StoredBookingState | null {
     }
 
     return JSON.parse(storedValue) as StoredBookingState;
-  } catch (_error) {
+  } catch {
     return null;
   }
 }
@@ -123,7 +136,7 @@ export function BookingProvider({
   );
   const [submitting, setSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
-  const [confirmation, setConfirmation] = useState<BookingConfirmation | null>(null);
+  const [confirmation, setConfirmation] = useState<ConfirmedBooking | null>(null);
 
   const selectedSalon =
     data.salons.find((salon) => salon.id === selectedSalonId) ?? null;
@@ -281,9 +294,28 @@ export function BookingProvider({
         needsConsultation
       };
 
-      const nextConfirmation = await submitBookingRequest(payload);
+      // Capture snapshot from current state BEFORE refreshData() clears availability
+      const snapshotSalonName = selectedSalon.name;
+      const snapshotStylistName = selectedStylist.name;
+      const snapshotDate = selectedDate;
+      const snapshotTime = selectedTime;
+      const snapshotServiceNames = selectedServices.map((s) => s.name);
+      const snapshotConsultation = needsConsultation;
+
+      const apiResult = await submitBookingRequest(payload);
       await refreshData();
-      setConfirmation(nextConfirmation);
+
+      setConfirmation({
+        bookingId: apiResult.bookingId,
+        confirmationCode: apiResult.confirmationCode,
+        totalAmount: apiResult.totalAmount,
+        salonName: snapshotSalonName,
+        stylistName: snapshotStylistName,
+        appointmentDate: snapshotDate,
+        appointmentTime: snapshotTime,
+        serviceNames: snapshotServiceNames,
+        needsConsultation: snapshotConsultation
+      });
     } catch (error) {
       setSubmissionError(
         error instanceof Error ? error.message : "Không thể chốt lịch lúc này."

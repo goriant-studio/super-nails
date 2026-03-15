@@ -5,13 +5,11 @@ import { BottomNav } from "../components/app-bottom-nav";
 import { MobileShell } from "../components/MobileShell";
 import { SectionHeader } from "../components/SectionHeader";
 import {
-  BellIcon,
   CalendarIcon,
   ChevronRightIcon,
   GlobeIcon,
   PhoneIcon,
   ShieldCheckIcon,
-  ShoppingBagIcon,
   StarIcon,
   TicketIcon,
 } from "../components/icons";
@@ -51,39 +49,21 @@ export function HomePage() {
         <div className="flex items-start gap-3">
           {/* Avatar */}
           <div className="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-full bg-white/90 text-brand-700 shadow-lg">
-            <span className="font-heading text-base font-bold">SL</span>
+            <span className="font-heading text-base font-bold">SN</span>
           </div>
 
           {/* Profile info */}
           <div className="flex-1 min-w-0">
-            <h1 className="font-heading text-xl font-bold leading-tight">LAM LE</h1>
+            <h1 className="font-heading text-xl font-bold leading-tight">Chào bạn!</h1>
             <p className="text-white/75 text-sm font-medium mt-0.5">
-              Chưa có hạng thành viên
+              Sẵn sàng đặt lịch làm đẹp
             </p>
             <Link
               className="inline-flex items-center gap-1 text-white text-sm font-semibold mt-1"
               to="/booking"
             >
-              Đăng ký ngay
+              Đặt lịch ngay
               <ChevronRightIcon width={14} height={14} />
-            </Link>
-          </div>
-
-          {/* Action icons */}
-          <div className="flex gap-2">
-            <Link
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/10 border border-white/20 text-white"
-              to="/services"
-              aria-label="Shop"
-            >
-              <ShoppingBagIcon width={20} height={20} />
-            </Link>
-            <Link
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/10 border border-white/20 text-white"
-              to="/booking"
-              aria-label="Thông báo"
-            >
-              <BellIcon width={20} height={20} />
             </Link>
           </div>
         </div>

@@ -29,8 +29,8 @@ Priorities:
 - Frontend: React + TypeScript + Vite
 - Backend: Express
 - Database: SQLite via `better-sqlite3`
-- Current styling: custom CSS in `client/src/index.css`
-- Preferred direction for future UI refactors: Tailwind CSS
+- Current styling: Tailwind CSS with shared tokens/utilities in `client/src/global.css`
+- UI direction: Tailwind-first, mobile-first, reusable component primitives
 
 ## Important Routes
 
@@ -42,13 +42,18 @@ Priorities:
 ## Important Files
 
 - `client/src/App.tsx`
+- `client/src/booking-context.tsx`
 - `client/src/pages/home-page.tsx`
 - `client/src/pages/booking-page.tsx`
 - `client/src/pages/salon-page.tsx`
 - `client/src/pages/services-page.tsx`
-- `client/src/components/device-shell.tsx`
+- `client/src/components/MobileShell.tsx`
+- `client/src/components/AppHeader.tsx`
 - `client/src/components/app-bottom-nav.tsx`
-- `client/src/index.css`
+- `client/src/components/StickySummaryBar.tsx`
+- `client/src/components/salon-card.tsx`
+- `client/src/components/service-card.tsx`
+- `client/src/global.css`
 - `server/src/index.js`
 - `server/src/db.js`
 - `AGENTS.sh`
@@ -156,13 +161,13 @@ Avoid:
 
 ## Styling Guidance
 
-If you touch UI substantially, prefer migrating toward Tailwind CSS.
+Tailwind CSS is the default UI system for this repo.
 
 Rules:
 - Tailwind should be the default for new UI work.
-- It is acceptable to keep old CSS temporarily during migration.
-- Do not leave the app half-migrated without clear structure.
-- If introducing Tailwind, create reusable primitives/components instead of scattering inconsistent class patterns.
+- Avoid reintroducing large page-specific CSS files as the primary styling layer.
+- Keep shared tokens and utilities centralized in `client/src/global.css` and Tailwind config.
+- Create reusable primitives/components instead of scattering inconsistent class patterns.
 
 Suggested reusable pieces:
 - mobile shell
@@ -182,6 +187,148 @@ Suggested reusable pieces:
 - Do not replace the database with a remote DB.
 - Preserve the existing API contract unless there is a strong reason to change it.
 - Prefer extending seed data and response shape carefully instead of rewriting the backend.
+
+## Known Gaps To Address
+
+- Keep this file in sync with the actual codebase. Outdated file maps cause bad AI edits and wrong implementation assumptions.
+- The booking API must validate that the chosen stylist belongs to the chosen salon before inserting a booking.
+- The app header back action needs a safe fallback route for direct-entry/deep-link sessions.
+- The booking header "home" action must not silently stop navigation when paired with local state cleanup.
+- Booking confirmation details are currently too coupled to live selection state and can disappear after refresh marks the slot unavailable.
+- PWA assets and service worker registration need to be safe for both root-path and subpath deployments.
+- The bottom navigation should not point to placeholder routes that mislead users.
+- The repo should pass `typecheck`, `lint`, and `build` cleanly before UI polish is considered complete.
+- The repo needs basic automated coverage for booking flow, API validation, and primary navigation states.
+- Current architecture is still MVP-level; avoid expanding fake features in the UI without backing models/routes.
+
+## Implementation Plan
+
+### Phase 1: Stabilize Navigation, Booking State, And Critical Bugs
+
+Goals:
+- remove misleading navigation behavior
+- prevent invalid bookings from the API
+- make direct-entry PWA flows safer
+- keep confirmation/success states reliable after live data refresh
+- remove deployment-sensitive path bugs before visual work starts
+
+Tasks:
+- Fix the interaction between `client/src/pages/booking-page.tsx` and `client/src/components/AppHeader.tsx` so the leading "home" action can clear transient state without blocking navigation.
+- Preserve a booking success snapshot in `client/src/booking-context.tsx` and/or `client/src/pages/booking-page.tsx` so the confirmation banner keeps the booked salon/date/time even after slot availability refreshes.
+- Make service worker, manifest, icon, and related client asset paths base-aware in `client/src/main.tsx`, `client/index.html`, and other affected files.
+- Fix `client/src/components/app-bottom-nav.tsx` so each tab either routes to a real screen or is clearly disabled/hidden until the feature exists.
+- Update `client/src/components/AppHeader.tsx` so `back` falls back to a safe in-app route when browser history is empty or external.
+- Add server-side validation in `server/src/db.js` to ensure `stylistId` belongs to `salonId`.
+- Return clearer API errors for invalid salon/stylist/service combinations.
+- Remove current lint blockers in `client/src/booking-context.tsx` and `client/src/main.tsx` as part of the stabilization pass.
+
+Definition of done:
+- users cannot be routed to the wrong screen from the main nav
+- direct opens of `/booking`, `/salons`, or `/services` still navigate safely
+- invalid stylist/salon payloads are rejected by the server
+- booking success still shows correct confirmation details after data refresh
+- the app loads correctly from both `/` and configured Vite base paths
+- `./AGENTS.sh lint` passes alongside typecheck/build
+
+### Phase 2: Tighten Mobile UI Foundation
+
+Goals:
+- improve layout integrity on 375px, 390px, and 412px widths
+- make spacing, typography, and sticky elements consistent
+
+Tasks:
+- Audit `HomePage`, `BookingPage`, `SalonPage`, and `ServicesPage` for overflow, cramped cards, inconsistent spacing, and sticky footer overlap.
+- Normalize page sections using shared wrappers such as `MobileShell`, `AppHeader`, `SectionHeader`, `TimeSlotButton`, `StickySummaryBar`, `salon-card`, and `service-card`.
+- Refine typography for Vietnamese labels so text with diacritics remains readable at mobile sizes.
+- Verify tap targets, card padding, and CTA hierarchy for one-handed use.
+- Revisit safe-area handling and fixed-position bars so sticky summaries, floating hotline CTA, and bottom nav do not collide.
+- Replace obviously placeholder UI states or labels such as hard-coded profile identity, fake country badges, and unfinished action affordances.
+
+Definition of done:
+- no text clipping or broken card proportions on target phone widths
+- sticky summaries and bottom nav never cover actionable content
+- shared components express a consistent visual system
+
+### Phase 3: Improve Vietnamese UX In Booking Flow
+
+Goals:
+- make the booking journey easier to scan and complete quickly
+- reduce hesitation for Vietnamese users on mobile
+
+Tasks:
+- Simplify wording across booking steps, salon cards, service cards, and CTAs using natural Vietnamese copy.
+- Make selected, active, disabled, premium, and unavailable states more obvious.
+- Improve the booking step rail so completion/progress is visually clear from top to bottom.
+- Rebalance the order and prominence of salon, stylist, date, time, and service decisions to support quick booking.
+- Ensure pricing, dates, and time-slot labels are formatted in a way familiar to Vietnamese users.
+- Remove copy that feels overly placeholder, gender-assumptive, or disconnected from actual product state.
+
+Definition of done:
+- users can understand the next action at a glance
+- selection states are visible without extra explanation
+- booking feels closer to a native Vietnamese service app than a resized website
+
+### Phase 4: Polish Salon And Service Discovery
+
+Goals:
+- make search, filtering, and browsing feel trustworthy and easy
+- reduce visual density without losing important information
+
+Tasks:
+- Refine salon search/filter rows for `Gần bạn`, `Có chỗ đậu ô tô`, and `Premium`.
+- Re-evaluate default filter states so the salon list does not look unexpectedly sparse on first load.
+- Rework salon cards to prioritize hero image, name, address, distance, utility badges, and primary CTA.
+- Improve service category chips and service cards so price, duration, and selection status are obvious.
+- Review summary/footer states so users always understand how many services are selected and what the current total is.
+- Decide whether the services grid/list toggle is truly useful; if not, simplify to one stronger default layout.
+
+Definition of done:
+- salon and service lists are easy to scan on small screens
+- filter states are obvious
+- totals and selected items remain understandable throughout the flow
+
+### Phase 5: Harden Architecture For Next Iteration
+
+Goals:
+- reduce implementation risk as the app grows
+- prepare the codebase for future native clients
+
+Tasks:
+- Introduce lightweight request validation for API payloads before they reach the database layer.
+- Separate schema/seed/bootstrap/query/write concerns in the backend over time instead of keeping all logic in one file.
+- Add a minimal test layer:
+  - booking API success/failure cases
+  - invalid stylist/salon combination
+  - core booking context state transitions
+  - navigation regressions for primary routes
+- Keep route contracts stable so future iPhone/Android clients can reuse the same booking flow semantics.
+
+Definition of done:
+- core booking logic is protected by tests
+- backend validation failures are explicit and consistent
+- frontend and backend responsibilities are easier to reason about
+
+### Suggested Execution Order
+
+1. Fix navigation, confirmation-state, deployment-path, and API validation bugs first.
+2. Make the project green on `typecheck`, `lint`, and `build`.
+3. Clean up mobile layout integrity across all primary screens.
+4. Polish Vietnamese UX copy, hierarchy, and states.
+5. Improve salon/service discovery screens.
+6. Add validation and tests before expanding feature scope.
+
+### Verification Gates
+
+Run before closing any UI/bugfix pass:
+- `./AGENTS.sh typecheck`
+- `./AGENTS.sh lint`
+- `./AGENTS.sh build`
+
+Manual QA checklist:
+- verify `/`, `/booking`, `/salons`, and `/services` on 375px, 390px, and 412px widths
+- confirm sticky elements do not cover core actions
+- confirm booking success preserves visible confirmation details after submission
+- confirm root-path and subpath builds both load their static assets correctly
 
 ## Working Style
 
@@ -205,7 +352,7 @@ If the task is about frontend polish, prioritize:
 1. mobile layout integrity
 2. Vietnamese UX clarity
 3. cleaner booking flow
-4. Tailwind-based UI refactor
+4. fix real booking/navigation bugs before adding more screens
 5. visual consistency across home, booking, salon, and service screens
 
 ## Default Assumption

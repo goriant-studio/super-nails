@@ -1,8 +1,15 @@
-const CACHE_NAME = "super-nails-shell-v1";
-const RUNTIME_CACHE = "super-nails-runtime-v1";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/icon.svg"];
+const CACHE_NAME = "super-nails-shell-v2";
+const RUNTIME_CACHE = "super-nails-runtime-v2";
 
 self.addEventListener("install", (event) => {
+  // Resolve app shell URLs relative to the SW scope so it works under any base path
+  const scope = self.registration.scope;
+  const APP_SHELL = [
+    scope,
+    new URL("manifest.webmanifest", scope).href,
+    new URL("icon.svg", scope).href
+  ];
+
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
   );
@@ -37,8 +44,10 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (request.mode === "navigate") {
+    // Fall back to the scope root (index.html) for SPA navigation
+    const scopeUrl = self.registration.scope;
     event.respondWith(
-      fetch(request).catch(() => caches.match("/") || Response.error())
+      fetch(request).catch(() => caches.match(scopeUrl) || Response.error())
     );
     return;
   }

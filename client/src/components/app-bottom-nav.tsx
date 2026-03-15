@@ -3,13 +3,11 @@ import { NavLink } from "react-router-dom";
 
 import {
   CalendarIcon,
-  ClockIcon,
   HomeIcon,
   ShoppingBagIcon,
-  UserIcon,
 } from "./icons";
 
-type NavKey = "home" | "shop" | "booking" | "history" | "account";
+type NavKey = "home" | "shop" | "booking";
 
 interface BottomNavProps {
   active: NavKey;
@@ -29,28 +27,16 @@ export function BottomNav({ active }: BottomNavProps) {
       icon: <HomeIcon width={22} height={22} />,
     },
     {
-      key: "shop",
-      label: "Dịch vụ",
-      to: "/services",
-      icon: <ShoppingBagIcon width={22} height={22} />,
-    },
-    {
       key: "booking",
       label: "Đặt lịch",
       to: "/booking",
       icon: <CalendarIcon width={24} height={24} />,
     },
     {
-      key: "history",
-      label: "Lịch sử",
-      to: "/booking",
-      icon: <ClockIcon width={22} height={22} />,
-    },
-    {
-      key: "account",
-      label: "Tài khoản",
-      to: "/",
-      icon: <UserIcon width={22} height={22} />,
+      key: "shop",
+      label: "Dịch vụ",
+      to: "/services",
+      icon: <ShoppingBagIcon width={22} height={22} />,
     },
   ];
 

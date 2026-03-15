@@ -20,8 +20,8 @@ export function StickySummaryBar({
   disabled = false,
 }: StickySummaryBarProps) {
   return (
-    <div className="fixed bottom-16 inset-x-0 z-20 max-w-lg mx-auto">
-      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-white/95 backdrop-blur-lg border-t border-surface-border shadow-nav">
+    <div className="fixed bottom-0 inset-x-0 z-20 max-w-lg mx-auto">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 pb-safe-bottom bg-white/95 backdrop-blur-lg border-t border-surface-border shadow-nav">
         <div className="min-w-0">
           <span className="text-sm font-semibold text-brand-700">
             Đã chọn {count} dịch vụ

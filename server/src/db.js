@@ -598,11 +598,40 @@ function createBooking(payload) {
   } = payload;
 
   if (!salonId || !stylistId || !appointmentDate || !appointmentTime || !Array.isArray(serviceIds)) {
-    throw new Error("Missing booking information.");
+    throw new Error("Thiếu thông tin đặt lịch.");
   }
 
   if (serviceIds.length === 0 && !needsConsultation) {
-    throw new Error("Please choose at least one service or request a consultation.");
+    throw new Error("Vui lòng chọn ít nhất một dịch vụ hoặc yêu cầu tư vấn.");
+  }
+
+  // Validate salonId exists
+  const salon = db.prepare("SELECT id FROM salons WHERE id = ?").get(salonId);
+  if (!salon) {
+    throw new Error("Salon không tồn tại.");
+  }
+
+  // Validate stylistId belongs to salonId
+  const stylist = db
+    .prepare("SELECT id FROM stylists WHERE id = ? AND salon_id = ?")
+    .get(stylistId, salonId);
+  if (!stylist) {
+    throw new Error("Stylist không thuộc salon đã chọn.");
+  }
+
+  // Validate all serviceIds exist
+  if (serviceIds.length) {
+    const services = db
+      .prepare(
+        `SELECT id, price
+         FROM services
+         WHERE id IN (${serviceIds.map(() => "?").join(",")})`
+      )
+      .all(...serviceIds);
+
+    if (services.length !== serviceIds.length) {
+      throw new Error("Một số dịch vụ không hợp lệ.");
+    }
   }
 
   const slot = db
@@ -614,7 +643,7 @@ function createBooking(payload) {
     .get(salonId, appointmentDate, appointmentTime);
 
   if (!slot || !slot.is_available) {
-    const slotError = new Error("Selected slot is no longer available.");
+    const slotError = new Error("Khung giờ này không còn trống.");
     slotError.code = "SLOT_UNAVAILABLE";
     throw slotError;
   }
@@ -628,10 +657,6 @@ function createBooking(payload) {
         )
         .all(...serviceIds)
     : [];
-
-  if (serviceIds.length && services.length !== serviceIds.length) {
-    throw new Error("Some services could not be found.");
-  }
 
   const totalAmount = services.reduce((sum, service) => sum + service.price, 0);
   const timestamp = new Date().toISOString();

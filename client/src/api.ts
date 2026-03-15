@@ -15,7 +15,18 @@ async function parseJson<T>(response: Response): Promise<T> {
 }
 
 export async function fetchBootstrapData(): Promise<BootstrapData> {
-  const response = await fetch("/api/bootstrap");
+  // Try live API first, fallback to static JSON (GitHub Pages)
+  try {
+    const response = await fetch("/api/bootstrap");
+    if (response.ok) {
+      return response.json() as Promise<BootstrapData>;
+    }
+  } catch {
+    // API not available, use static data
+  }
+
+  const base = import.meta.env.BASE_URL;
+  const response = await fetch(`${base}api/bootstrap.json`);
   return parseJson<BootstrapData>(response);
 }
 

@@ -2,13 +2,13 @@
   "name": "Super Nails",
   "short_name": "SuperNails",
   "description": "Progressive web app dat lich mobile-first cho Super Nails.",
-  "start_url": "/",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#f3f1eb",
   "theme_color": "#17397f",
   "icons": [
     {
-      "src": "/icon.svg",
+      "src": "icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
