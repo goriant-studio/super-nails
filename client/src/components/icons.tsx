@@ -150,6 +150,16 @@ export function CheckIcon(props: SVGProps<SVGSVGElement>) {
   return createIcon(<path d="m5 13 4 4L19 7" />, props);
 }
 
+export function CloseIcon(props: SVGProps<SVGSVGElement>) {
+  return createIcon(
+    <>
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </>,
+    props
+  );
+}
+
 export function ClockIcon(props: SVGProps<SVGSVGElement>) {
   return createIcon(
     <>

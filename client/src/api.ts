@@ -2,6 +2,41 @@ import type { BookingConfirmation, BookingPayload, BootstrapData, TimeSlot } fro
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
+export interface BookingDetail {
+  id: number;
+  confirmationCode: string;
+  salonId: number;
+  salonName: string;
+  salonNameEn: string;
+  salonNameVi: string;
+  salonAddress: string;
+  stylistId: number;
+  stylistName: string;
+  stylistTitle: string;
+  stylistTitleEn: string;
+  stylistTitleVi: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  customerName: string;
+  needsConsultation: boolean;
+  totalAmount: number;
+  status: string;
+  paymentMethod: string;
+  tipAmount: number;
+  reminderSentAt: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  createdAt: string;
+  services: {
+    id: number;
+    name: string;
+    nameEn: string;
+    nameVi: string;
+    price: number;
+    durationMinutes: number;
+  }[];
+}
+
 async function parseJson<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const payload = await response.json().catch(() => null);
@@ -70,5 +105,35 @@ export async function submitBookingRequest(
   });
 
   const data = await parseJson<{ ok: boolean; booking: BookingConfirmation }>(response);
+  return data.booking;
+}
+
+/** Fetch a single booking's full detail. */
+export async function fetchBookingDetail(bookingId: number): Promise<BookingDetail> {
+  const response = await fetch(`${API_BASE}/api/bookings/${bookingId}`);
+  const data = await parseJson<{ ok: boolean; booking: BookingDetail }>(response);
+  return data.booking;
+}
+
+/** Cancel a booking. */
+export async function cancelBookingRequest(
+  bookingId: number,
+  reason?: string
+): Promise<BookingDetail> {
+  const response = await fetch(`${API_BASE}/api/bookings/${bookingId}/cancel`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ reason }),
+  });
+  const data = await parseJson<{ ok: boolean; booking: BookingDetail }>(response);
+  return data.booking;
+}
+
+/** Send a reminder for a booking. */
+export async function sendReminderRequest(bookingId: number): Promise<BookingDetail> {
+  const response = await fetch(`${API_BASE}/api/bookings/${bookingId}/remind`, {
+    method: "POST",
+  });
+  const data = await parseJson<{ ok: boolean; booking: BookingDetail }>(response);
   return data.booking;
 }

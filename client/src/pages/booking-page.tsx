@@ -19,6 +19,7 @@ import {
   CalendarIcon,
   CheckIcon,
   ChevronRightIcon,
+  CloseIcon,
   HomeIcon,
   LightbulbIcon,
   ScissorsIcon,
@@ -85,6 +86,7 @@ export function BookingPage() {
     chooseDate,
     chooseStylist,
     chooseTime,
+    toggleService,
     subtotal,
     taxAmount,
     tipAmount,
@@ -96,6 +98,12 @@ export function BookingPage() {
     confirmation,
     clearConfirmation,
   } = useBooking();
+
+  // Redirect to success page when confirmation is set
+  if (confirmation) {
+    navigate('/booking/success', { replace: true });
+    return null;
+  }
 
   const referenceDate = availableDates[0] ?? selectedDate;
   const nextDate = availableDates.find((date) => date !== selectedDate) ?? null;
@@ -136,40 +144,7 @@ export function BookingPage() {
           </div>
         </div>
 
-        {/* Confirmation banner */}
-        {confirmation ? (
-          <div className="p-4 rounded-card-lg bg-accent-green-light border border-accent-green/20 mb-4 space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold text-gray-500">
-                  {t("booking.success_title")}
-                </p>
-                <h3 className="font-heading text-lg font-bold text-accent-green mt-0.5">
-                  {confirmation.confirmationCode}
-                </h3>
-                <p className="text-sm text-gray-600 mt-0.5">
-                  {confirmation.salonName} • {confirmation.appointmentTime}
-                </p>
-              </div>
-              <button
-                className="px-3 py-2 rounded-button bg-white text-brand-700 text-sm font-semibold border border-brand-200"
-                onClick={clearConfirmation}
-                type="button"
-              >
-                {t("common.close")}
-              </button>
-            </div>
 
-            {/* Track Your Visit CTA */}
-            <button
-              type="button"
-              onClick={() => navigate(`/tour/${confirmation.bookingId}`)}
-              className="w-full py-3 rounded-xl bg-brand-700 text-white font-bold text-sm shadow-button hover:bg-brand-600 active:scale-95 transition-all flex items-center justify-center gap-2"
-            >
-              📍 {t("booking.track_visit")}
-            </button>
-          </div>
-        ) : null}
 
         {/* Booking steps */}
         <div className="space-y-0">
@@ -367,9 +342,19 @@ export function BookingPage() {
                     <span className="text-sm text-brand-900 truncate">
                       {service.name}
                     </span>
-                    <strong className="text-sm font-bold text-brand-700 flex-shrink-0">
-                      {formatCurrency(service.price)}
-                    </strong>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <strong className="text-sm font-bold text-brand-700">
+                        {formatCurrency(service.price)}
+                      </strong>
+                      <button
+                        type="button"
+                        onClick={() => toggleService(service.id)}
+                        className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-accent-rose hover:bg-accent-rose/10 transition-all active:scale-90"
+                        aria-label="Remove service"
+                      >
+                        <CloseIcon width={14} height={14} />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

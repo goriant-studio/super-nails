@@ -79,6 +79,7 @@ interface BookingContextValue {
   toggleService: (serviceId: number) => void;
   toggleConsultation: () => void;
   clearConfirmation: () => void;
+  resetBooking: () => void;
   // Payment
   paymentMethod: PaymentMethod;
   setPaymentMethod: (method: PaymentMethod) => void;
@@ -318,6 +319,18 @@ export function BookingProvider({
     setConfirmation(null);
   }
 
+  function resetBooking() {
+    setSelectedServiceIds([]);
+    setNeedsConsultation(false);
+    setSelectedTime(null);
+    setTipPercent(18);
+    setTipCustomAmount(null);
+    setPaymentMethod("card");
+    setConfirmation(null);
+    setSubmissionError(null);
+    window.localStorage.removeItem(STORAGE_KEY);
+  }
+
   const canCheckout = Boolean(
     selectedSalon && selectedStylist && selectedDate && selectedTime && (selectedServiceIds.length > 0 || needsConsultation)
   );
@@ -408,6 +421,7 @@ export function BookingProvider({
         toggleService,
         toggleConsultation,
         clearConfirmation,
+        resetBooking,
         paymentMethod,
         setPaymentMethod,
         subtotal,
