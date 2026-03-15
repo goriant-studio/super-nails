@@ -1,10 +1,14 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useBooking } from "../booking-context";
 import { AppHeader } from "../components/AppHeader";
 import { MobileShell } from "../components/MobileShell";
+import { PaymentSection } from "../components/payment-section";
+import { TipSelector } from "../components/tip-selector";
 import { TimeSlotButton } from "../components/TimeSlotButton";
+import { useT } from "../i18n/i18n-context";
+import { useLocale } from "../i18n/i18n-context";
 import {
   formatAvailabilityHint,
   formatCurrency,
@@ -33,7 +37,6 @@ function BookingStep({ number, title, status, children }: StepProps) {
     <section className="flex gap-3">
       {/* Rail */}
       <div className="relative flex flex-col items-center">
-        {/* Vertical line */}
         <span
           className={`absolute top-0 -bottom-5 w-1 rounded-chip ${
             status === "complete"
@@ -41,7 +44,6 @@ function BookingStep({ number, title, status, children }: StepProps) {
               : "bg-gray-200"
           }`}
         />
-        {/* Dot */}
         <span
           className={`relative z-10 w-8 h-8 flex items-center justify-center rounded-full border-4 border-surface-muted ${
             status === "complete" || status === "active"
@@ -65,6 +67,10 @@ function BookingStep({ number, title, status, children }: StepProps) {
 }
 
 export function BookingPage() {
+  const t = useT();
+  const { locale } = useLocale();
+  const navigate = useNavigate();
+
   const {
     data,
     selectedSalon,
@@ -79,7 +85,10 @@ export function BookingPage() {
     chooseDate,
     chooseStylist,
     chooseTime,
-    selectedTotal,
+    subtotal,
+    taxAmount,
+    tipAmount,
+    grandTotal,
     canCheckout,
     submitBooking,
     submitting,
@@ -105,7 +114,7 @@ export function BookingPage() {
   return (
     <MobileShell>
       <AppHeader
-        title="Đặt lịch giữ chỗ"
+        title={t("booking.title")}
         leading="home"
         onLeadingClick={() => clearConfirmation()}
         leadingFallbackTo="/"
@@ -116,10 +125,10 @@ export function BookingPage() {
         <div className="flex items-center justify-between p-4 rounded-card-lg bg-gradient-to-br from-brand-50 to-white border border-brand-100 mb-4">
           <div>
             <span className="inline-flex px-2.5 py-1 rounded-chip bg-brand-100 text-brand-700 text-[10px] font-bold uppercase tracking-wider">
-              Đặt lịch giữ chỗ
+              {t("booking.title")}
             </span>
             <p className="text-sm font-semibold text-gray-500 mt-2">
-              Chọn salon, stylist và dịch vụ yêu thích
+              {t("home.hero_subtitle")}
             </p>
           </div>
           <div className="w-11 h-11 flex items-center justify-center rounded-card bg-brand-700 text-white shadow-button">
@@ -129,34 +138,45 @@ export function BookingPage() {
 
         {/* Confirmation banner */}
         {confirmation ? (
-          <div className="flex items-center justify-between gap-3 p-4 rounded-card-lg bg-accent-green-light border border-accent-green/20 mb-4">
-            <div>
-              <p className="text-xs font-semibold text-gray-500">
-                Đã giữ chỗ thành công
-              </p>
-              <h3 className="font-heading text-lg font-bold text-accent-green mt-0.5">
-                {confirmation.confirmationCode}
-              </h3>
-              <p className="text-sm text-gray-600 mt-0.5">
-                {confirmation.salonName} lúc {confirmation.appointmentTime}
-              </p>
+          <div className="p-4 rounded-card-lg bg-accent-green-light border border-accent-green/20 mb-4 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold text-gray-500">
+                  {t("booking.success_title")}
+                </p>
+                <h3 className="font-heading text-lg font-bold text-accent-green mt-0.5">
+                  {confirmation.confirmationCode}
+                </h3>
+                <p className="text-sm text-gray-600 mt-0.5">
+                  {confirmation.salonName} • {confirmation.appointmentTime}
+                </p>
+              </div>
+              <button
+                className="px-3 py-2 rounded-button bg-white text-brand-700 text-sm font-semibold border border-brand-200"
+                onClick={clearConfirmation}
+                type="button"
+              >
+                {t("common.close")}
+              </button>
             </div>
+
+            {/* Track Your Visit CTA */}
             <button
-              className="px-3 py-2 rounded-button bg-white text-brand-700 text-sm font-semibold border border-brand-200"
-              onClick={clearConfirmation}
               type="button"
+              onClick={() => navigate(`/tour/${confirmation.bookingId}`)}
+              className="w-full py-3 rounded-xl bg-brand-700 text-white font-bold text-sm shadow-button hover:bg-brand-600 active:scale-95 transition-all flex items-center justify-center gap-2"
             >
-              Đóng
+              📍 {t("booking.track_visit")}
             </button>
           </div>
         ) : null}
 
         {/* Booking steps */}
         <div className="space-y-0">
-          {/* Step 1: Chọn salon */}
+          {/* Step 1: Choose salon */}
           <BookingStep
             number={1}
-            title="Chọn salon"
+            title={t("booking.step_salon")}
             status={salonDone ? "complete" : "active"}
           >
             <Link
@@ -170,12 +190,12 @@ export function BookingPage() {
                 <strong className="block text-sm font-bold text-brand-900">
                   {selectedSalon
                     ? selectedSalon.shortAddress
-                    : "Xem tất cả salon"}
+                    : t("salon.title")}
                 </strong>
                 <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
                   {selectedSalon
                     ? `${selectedSalon.district}, ${selectedSalon.city}`
-                    : "Tìm chi nhánh gần bạn bất cứ lúc nào"}
+                    : t("salon.no_results")}
                 </p>
               </div>
               <ChevronRightIcon
@@ -186,10 +206,10 @@ export function BookingPage() {
             </Link>
           </BookingStep>
 
-          {/* Step 2: Chọn ngày, giờ & stylist */}
+          {/* Step 2: Date, Time & Stylist */}
           <BookingStep
             number={2}
-            title="Chọn ngày, giờ và stylist"
+            title={t("booking.step_datetime")}
             status={
               scheduleDone ? "complete" : salonDone ? "active" : "pending"
             }
@@ -242,15 +262,15 @@ export function BookingPage() {
               <div className="flex-1 min-w-0">
                 <strong className="block text-sm font-bold text-brand-900">
                   {selectedDate
-                    ? formatDateLabel(selectedDate, referenceDate)
-                    : "Chưa chọn ngày"}
+                    ? formatDateLabel(selectedDate, referenceDate, locale)
+                    : t("booking.select_date")}
                 </strong>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  Giá cuối tuần có thể chênh nhẹ cho combo hot.
+                  {t("booking.peak")}
                 </p>
               </div>
               <span className="flex-shrink-0 px-2.5 py-1 rounded-chip bg-accent-rose-light text-accent-rose text-xs font-bold">
-                {selectedDate ? getWeekendLabel(selectedDate) : "Trong tuần"}
+                {selectedDate ? getWeekendLabel(selectedDate, locale) : t("booking.weekday")}
               </span>
             </div>
 
@@ -267,7 +287,7 @@ export function BookingPage() {
                   onClick={() => chooseDate(date)}
                   type="button"
                 >
-                  {formatDateLabel(date, referenceDate)}
+                  {formatDateLabel(date, referenceDate, locale)}
                 </button>
               ))}
             </div>
@@ -281,8 +301,8 @@ export function BookingPage() {
               />
               <span className="text-sm font-semibold leading-snug">
                 {nextDate
-                  ? formatAvailabilityHint(nextDateSlots.length)
-                  : "Chọn giờ trống trong ngày để chốt lịch nhanh hơn."}
+                  ? formatAvailabilityHint(nextDateSlots.length, locale)
+                  : t("booking.no_slots")}
               </span>
             </div>
 
@@ -300,26 +320,14 @@ export function BookingPage() {
             </div>
           </BookingStep>
 
-          {/* Step 3: Chọn dịch vụ */}
+          {/* Step 3: Choose services */}
           <BookingStep
             number={3}
-            title="Chọn dịch vụ"
+            title={t("booking.step_services")}
             status={
               servicesDone ? "complete" : scheduleDone ? "active" : "pending"
             }
           >
-            {/* Hint */}
-            <div className="flex items-start gap-2 mb-3 text-brand-600">
-              <LightbulbIcon
-                width={18}
-                height={18}
-                className="flex-shrink-0 mt-0.5"
-              />
-              <span className="text-sm font-semibold leading-snug">
-                Giá dịch vụ có thể thay đổi nhẹ theo khung giờ và stylist anh chọn.
-              </span>
-            </div>
-
             <Link
               className="flex items-center gap-3 p-3.5 rounded-card bg-surface-muted border border-surface-border shadow-card hover:shadow-card-hover transition-shadow"
               to="/services"
@@ -330,15 +338,15 @@ export function BookingPage() {
               <div className="flex-1 min-w-0">
                 <strong className="block text-sm font-bold text-brand-900">
                   {selectedServices.length
-                    ? `Đã chọn ${selectedServices.length} dịch vụ`
+                    ? `${selectedServices.length} ${t("services.selected")}`
                     : needsConsultation
-                    ? "Cần tư vấn tại salon"
-                    : "Xem tất cả dịch vụ hấp dẫn"}
+                    ? t("booking.consultation")
+                    : t("services.title")}
                 </strong>
                 <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
                   {selectedServices.length
-                    ? "Có thể thay đổi ở màn hình dịch vụ trước khi chốt lịch."
-                    : "Combo, nail art, pedicure và spa thư giãn."}
+                    ? selectedServices.map((s) => s.name).join(", ")
+                    : t("home.section_services")}
                 </p>
               </div>
               <ChevronRightIcon
@@ -376,22 +384,58 @@ export function BookingPage() {
                   className="flex-shrink-0 mt-0.5"
                 />
                 <span className="text-sm font-semibold">
-                  Nhân viên sẽ giúp anh chọn dịch vụ phù hợp khi đến salon.
+                  {t("booking.consultation")}
                 </span>
               </div>
             ) : null}
-
-            {/* Total */}
-            <div className="flex items-center justify-between gap-3 mt-3 px-1 text-accent-green">
-              <span className="text-sm font-semibold">
-                Tổng số tiền anh cần thanh toán
-              </span>
-              <strong className="text-base font-bold">
-                {formatCurrency(selectedTotal)}
-              </strong>
-            </div>
           </BookingStep>
+
+          {/* Step 4: Tips */}
+          {servicesDone && (
+            <BookingStep
+              number={4}
+              title={t("tip.title")}
+              status={servicesDone ? "active" : "pending"}
+            >
+              <TipSelector />
+            </BookingStep>
+          )}
+
+          {/* Step 5: Payment */}
+          {servicesDone && (
+            <BookingStep
+              number={5}
+              title={t("booking.step_payment")}
+              status={servicesDone ? "active" : "pending"}
+            >
+              <PaymentSection />
+            </BookingStep>
+          )}
         </div>
+
+        {/* Price summary */}
+        {selectedServices.length > 0 && (
+          <div className="mt-4 p-4 rounded-card-lg bg-surface-muted border border-surface-border space-y-1.5 text-sm">
+            <div className="flex justify-between text-gray-500">
+              <span>{t("summary.subtotal")}</span>
+              <span>{formatCurrency(subtotal)}</span>
+            </div>
+            <div className="flex justify-between text-gray-500">
+              <span>{t("summary.tax", { rate: "8.875" })}</span>
+              <span>{formatCurrency(taxAmount)}</span>
+            </div>
+            {tipAmount > 0 && (
+              <div className="flex justify-between text-gray-500">
+                <span>{t("summary.tip")}</span>
+                <span>{formatCurrency(tipAmount)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-bold text-brand-900 text-base pt-1.5 border-t border-gray-200">
+              <span>{t("summary.total")}</span>
+              <span>{formatCurrency(grandTotal)}</span>
+            </div>
+          </div>
+        )}
 
         {/* Error */}
         {submissionError ? (
@@ -402,7 +446,7 @@ export function BookingPage() {
 
         {/* Submit CTA */}
         <button
-          className={`w-full flex items-center justify-center gap-2 py-4 rounded-button text-base font-bold transition-all active:scale-[0.98] mt-2 ${
+          className={`w-full flex items-center justify-center gap-2 py-4 rounded-button text-base font-bold transition-all active:scale-[0.98] mt-4 ${
             canCheckout && !submitting
               ? "bg-brand-700 text-white shadow-button hover:bg-brand-600"
               : "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -413,11 +457,8 @@ export function BookingPage() {
           }}
           type="button"
         >
-          {submitting ? "Đang giữ chỗ..." : "Xác nhận lịch"}
+          {submitting ? t("booking.submitting") : t("booking.confirm_btn")}
         </button>
-        <p className="text-center text-xs text-gray-400 mt-3">
-          Cắt xong trả tiền, huỷ lịch không sao.
-        </p>
       </main>
     </MobileShell>
   );
