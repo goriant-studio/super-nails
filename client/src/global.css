@@ -1,0 +1,91 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-synthesis: none;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #0f1f39;
+    background: #f8f7f4;
+    line-height: 1.5;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  input {
+    font: inherit;
+  }
+}
+
+/* Tone color utilities for salon/service cards */
+.tone-cobalt {
+  --tone-main: #13306d;
+  --tone-soft: #70a4ff;
+}
+
+.tone-sunrise {
+  --tone-main: #9c6a15;
+  --tone-soft: #ffca6b;
+}
+
+.tone-emerald {
+  --tone-main: #115a4b;
+  --tone-soft: #60d0b0;
+}
+
+.tone-violet {
+  --tone-main: #40216d;
+  --tone-soft: #b197ff;
+}
+
+.tone-rose {
+  --tone-main: #7b204b;
+  --tone-soft: #ff93c0;
+}
+
+.tone-sand {
+  --tone-main: #6c5434;
+  --tone-soft: #f2cc8f;
+}
+
+.tone-gold {
+  --tone-main: #7d5f16;
+  --tone-soft: #f0cf6d;
+}
+
+/* Scrollbar hiding for horizontal scrolls */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
