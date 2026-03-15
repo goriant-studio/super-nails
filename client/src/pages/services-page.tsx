@@ -10,6 +10,7 @@ import { StickySummaryBar } from "../components/StickySummaryBar";
 import { CheckIcon, SearchIcon } from "../components/icons";
 import { SectionHeader } from "../components/SectionHeader";
 import { useT, useLocale } from "../i18n/i18n-context";
+import { localized } from "../locale-helpers";
 
 export function ServicesPage() {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ export function ServicesPage() {
         const matchesCategory = service.categoryId === category.id;
         const matchesSearch =
           !searchTerm ||
-          `${service.name} ${service.description} ${service.tagline}`
+          `${service.name} ${service.description} ${service.tagline} ${service.nameEn || ""} ${service.nameVi || ""} ${service.descriptionEn || ""} ${service.descriptionVi || ""}`
             .toLowerCase()
             .includes(searchTerm.toLowerCase());
 
@@ -76,7 +77,7 @@ export function ServicesPage() {
           {data.categories.map((category) => (
             <FilterChip
               key={category.id}
-              label={category.name}
+              label={localized(category, "name", locale)}
               active={activeCategory === category.slug}
               onClick={() => setActiveCategory(category.slug)}
             />
@@ -98,9 +99,9 @@ export function ServicesPage() {
 
           return (
             <section className="mt-5" key={category.id}>
-              <SectionHeader title={category.name} />
+              <SectionHeader title={localized(category, "name", locale)} />
               <p className="text-xs text-gray-400 -mt-2 mb-3">
-                {category.teaser}
+                {localized(category, "teaser", locale)}
               </p>
 
               <div className="grid grid-cols-2 gap-3">

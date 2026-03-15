@@ -125,106 +125,106 @@ function seedStaticData() {
   }
 
   const provinces = [
-    [1, "TP Ho Chi Minh", "Mien Nam"],
-    [2, "Ha Noi", "Mien Bac"],
-    [3, "Da Nang", "Mien Trung"],
-    [4, "Hai Phong", "Mien Bac"],
-    [5, "Can Tho", "Mien Nam"],
-    [6, "Binh Duong", "Mien Nam"],
-    [7, "Dong Nai", "Mien Nam"],
-    [8, "Khanh Hoa", "Mien Trung"]
+    [1, "TP. Hồ Chí Minh", "Miền Nam"],
+    [2, "Hà Nội", "Miền Bắc"],
+    [3, "Đà Nẵng", "Miền Trung"],
+    [4, "Hải Phòng", "Miền Bắc"],
+    [5, "Cần Thơ", "Miền Nam"],
+    [6, "Bình Dương", "Miền Nam"],
+    [7, "Đồng Nai", "Miền Nam"],
+    [8, "Khánh Hòa", "Miền Trung"]
   ];
 
   const salons = [
     [
       1, 1, "Super Nails - Riverside Q7",
-      "Quan 7", "TP Ho Chi Minh",
-      "420 Huynh Tan Phat, P. Binh Thuan",
-      "420 Huynh Tan Phat, Q7",
-      "Gan cau Phu My, co bai do oto va phong nail signature view song.",
+      "Quận 7", "TP. Hồ Chí Minh",
+      "420 Huỳnh Tấn Phát, P. Bình Thuận",
+      "420 Huỳnh Tấn Phát, Q7",
+      "Gần cầu Phú Mỹ, có bãi đỗ ô tô và phòng nail signature view sông.",
       12, 5.5, 1, 1, 0, "cobalt",
       JSON.stringify(["Midnight gloss", "Blue facade", "Spa lounge"])
     ],
     [
-      2, 1, "Super Nails - Nguyen Thi Thap",
-      "Quan 7", "TP Ho Chi Minh",
-      "237 Nguyen Thi Thap, P. Tan Phu",
-      "237 Nguyen Thi Thap, Q7",
-      "Khong gian sang va nhanh, phu hop booking sau gio lam.",
+      2, 1, "Super Nails - Nguyễn Thị Thập",
+      "Quận 7", "TP. Hồ Chí Minh",
+      "237 Nguyễn Thị Thập, P. Tân Phú",
+      "237 Nguyễn Thị Thập, Q7",
+      "Không gian sáng và nhanh, phù hợp booking sau giờ làm.",
       14, 7.1, 1, 0, 1, "sunrise",
       JSON.stringify(["Gold bar", "Express care", "Glass storefront"])
     ],
     [
       3, 1, "Super Nails - Crescent Premium",
-      "Quan 7", "TP Ho Chi Minh",
-      "408 Nguyen Thi Thap, P. Tan Quy",
-      "408 Nguyen Thi Thap, Q7",
-      "Premium lounge, menu cham soc chuyen sau va bai do xe rong.",
+      "Quận 7", "TP. Hồ Chí Minh",
+      "408 Nguyễn Thị Thập, P. Tân Quy",
+      "408 Nguyễn Thị Thập, Q7",
+      "Premium lounge, menu chăm sóc chuyên sâu và bãi đỗ xe rộng.",
       16, 7.5, 1, 1, 1, "emerald",
       JSON.stringify(["Emerald lounge", "Private suite", "Art wall"])
     ],
     [
-      4, 1, "Super Nails - Tran Nao",
-      "Quan 2", "TP Ho Chi Minh",
-      "103 Tran Nao, P. Binh An",
-      "103 Tran Nao, Quan 2",
-      "Chi nhanh gan trung tam moi, phu hop combo cham soc da va nail art.",
+      4, 1, "Super Nails - Trần Não",
+      "Quận 2", "TP. Hồ Chí Minh",
+      "103 Trần Não, P. Bình An",
+      "103 Trần Não, Quận 2",
+      "Chi nhánh gần trung tâm mới, phù hợp combo chăm sóc da và nail art.",
       18, 9.1, 0, 1, 1, "violet",
       JSON.stringify(["Sky blue", "Signature room", "Soft glow"])
     ],
     [
-      5, 1, "Super Nails - Ton Dan",
-      "Quan 4", "TP Ho Chi Minh",
-      "25 Ton Dan, P. 13",
-      "25 Ton Dan, Quan 4",
-      "Diem hen nhanh cho khach yeu thich caticle clean va gel box.",
+      5, 1, "Super Nails - Tôn Đản",
+      "Quận 4", "TP. Hồ Chí Minh",
+      "25 Tôn Đản, P. 13",
+      "25 Tôn Đản, Quận 4",
+      "Điểm hẹn nhanh cho khách yêu thích cuticle clean và gel box.",
       20, 9.7, 0, 0, 1, "rose",
       JSON.stringify(["Rose studio", "Glass shelves", "Velvet seats"])
     ],
     [
-      6, 3, "Super Nails - Hai Chau",
-      "Hai Chau", "Da Nang",
-      "88 Bach Dang, Hai Chau",
-      "88 Bach Dang, Da Nang",
-      "Phong cach resort, phu hop khach du lich muon booking nhanh bang PWA.",
+      6, 3, "Super Nails - Hải Châu",
+      "Hải Châu", "Đà Nẵng",
+      "88 Bạch Đằng, Hải Châu",
+      "88 Bạch Đằng, Đà Nẵng",
+      "Phong cách resort, phù hợp khách du lịch muốn booking nhanh bằng PWA.",
       11, 4.2, 1, 1, 1, "sand",
       JSON.stringify(["Beach light", "Clean station", "River view"])
     ]
   ];
 
   const stylists = [
-    [1, 1, "Linh", "Master Nail Artist", "Gel ombre va charm stone", "cobalt"],
-    [2, 1, "An", "Senior Stylist", "Pedicure spa va French tips", "sunrise"],
-    [3, 1, "Vy", "Signature Artist", "Minimal chrome va cat eye", "violet"],
-    [4, 2, "Hanh", "Senior Stylist", "Combo nhanh sau gio lam", "emerald"],
-    [5, 2, "My", "Color Specialist", "Nhuom nail jelly va seasonal palette", "rose"],
-    [6, 3, "Nhi", "Premium Artist", "Builder gel va bridal set", "gold"],
-    [7, 3, "Tram", "Spa Lead", "Cham soc da tay chan chuyen sau", "emerald"],
-    [8, 4, "Thu", "Creative Lead", "Airbrush va line art", "violet"],
-    [9, 4, "Bao", "Spa Stylist", "Head spa va cham soc cuticle", "sand"],
-    [10, 5, "Khanh", "Signature Artist", "Box short set va nude collection", "rose"],
-    [11, 6, "Ha", "Resort Stylist", "Recovery spa va premium polish", "sand"]
+    [1, 1, "Linh", "Nghệ nhân Nail", "Gel ombré và charm đá", "cobalt"],
+    [2, 1, "An", "Stylist Cao cấp", "Pedicure spa và French tips", "sunrise"],
+    [3, 1, "Vy", "Nghệ nhân Signature", "Minimal chrome và cat eye", "violet"],
+    [4, 2, "Hạnh", "Stylist Cao cấp", "Combo nhanh sau giờ làm", "emerald"],
+    [5, 2, "My", "Chuyên gia Màu sắc", "Nhuộm nail jelly và seasonal palette", "rose"],
+    [6, 3, "Nhi", "Nghệ nhân Premium", "Builder gel và bridal set", "gold"],
+    [7, 3, "Trâm", "Trưởng nhóm Spa", "Chăm sóc da tay chân chuyên sâu", "emerald"],
+    [8, 4, "Thu", "Trưởng nhóm Sáng tạo", "Airbrush và line art", "violet"],
+    [9, 4, "Bảo", "Stylist Spa", "Head spa và chăm sóc cuticle", "sand"],
+    [10, 5, "Khánh", "Nghệ nhân Signature", "Box short set và nude collection", "rose"],
+    [11, 6, "Hà", "Stylist Resort", "Recovery spa và premium polish", "sand"]
   ];
 
   const categories = [
-    [1, "combo-moi", "Combo moi va hot", "Nhung goi dang duoc dat nhieu trong tuan"],
-    [2, "nail-co-ban", "Nail co ban", "Cat da, son gel va design nhe cho lich hen nhanh"],
-    [3, "nail-art", "Nail art va premium", "Builder gel, charm da va bo suu tap dep sang"],
-    [4, "pedicure", "Pedicure va cham soc", "Lam sach, massage va duong am chan"],
-    [5, "spa", "Spa thu gian", "Massage tay chan va phuc hoi da"]
+    [1, "combo-moi", "Combo mới và hot", "Những gói đang được đặt nhiều trong tuần"],
+    [2, "nail-co-ban", "Nail cơ bản", "Cắt da, sơn gel và design nhẹ cho lịch hẹn nhanh"],
+    [3, "nail-art", "Nail art và premium", "Builder gel, charm đá và bộ sưu tập đẹp sang"],
+    [4, "pedicure", "Pedicure và chăm sóc", "Làm sạch, massage và dưỡng ẩm chân"],
+    [5, "spa", "Spa thư giãn", "Massage tay chân và phục hồi da"]
   ];
 
   const services = [
-    [1, 1, "Shine Combo 1", "Cat da, son gel mot mau va massage tay 10 phut.", 45, 2500, "Dong gia cuoi tuan", "cobalt", "Nhanh, gon va de dat lich"],
-    [2, 1, "Shine Combo 2", "Cat da, son gel, cham soc cuticle va dap mat na tay.", 60, 4000, "Moi", "violet", "Combo de chot lich nhieu nhat"],
-    [3, 1, "Shine Combo 3", "Builder gel tu nhien, massage co vai va phu kien nhe.", 75, 5500, "Premium", "emerald", "Di kem thu gian co vai gay"],
-    [4, 2, "Cat xa express", "Cat da nhanh, duong mong va son duong bong.", 30, 1800, null, "sunrise", "Phu hop lich hen 30 phut"],
-    [5, 2, "French tip soft", "Nen gel trong va ve French tip tay cong mem.", 40, 3000, null, "cobalt", "Classic nhung van rat sang"],
-    [6, 3, "Cat eye galaxy", "Son gel cat eye nhieu lop va hieu ung anh kim.", 55, 3500, "Hot trend", "violet", "Len anh dep tren iPhone"],
-    [7, 3, "Bridal crystal set", "Bo nail cuoi voi charm da, line art va builder gel.", 90, 7500, "Premium", "gold", "Danh cho ngay dac biet"],
-    [8, 4, "Pedicure refresh", "Lam sach goc chan, tay da chet va son gel chan.", 50, 3200, null, "emerald", "Chan nhe va sach se hon"],
-    [9, 4, "Luxury spa pedicure", "Pedicure co massage da nong, muoi ngam va serum phuc hoi.", 65, 4800, "Thu gian", "sand", "Rat hop cho cuoi tuan"],
-    [10, 5, "Hand recovery ritual", "Tay te bao chet, massage, serum va paraffin mem da.", 35, 2800, null, "rose", "Duong am va phuc hoi nhanh"]
+    [1, 1, "Shine Combo 1", "Cắt da, sơn gel một màu và massage tay 10 phút.", 45, 2500, "Đồng giá cuối tuần", "cobalt", "Nhanh, gọn và dễ đặt lịch"],
+    [2, 1, "Shine Combo 2", "Cắt da, sơn gel, chăm sóc cuticle và đắp mặt nạ tay.", 60, 4000, "Mới", "violet", "Combo dễ chốt lịch nhiều nhất"],
+    [3, 1, "Shine Combo 3", "Builder gel tự nhiên, massage cổ vai và phụ kiện nhẹ.", 75, 5500, "Premium", "emerald", "Đi kèm thư giãn cổ vai gáy"],
+    [4, 2, "Cắt xả express", "Cắt da nhanh, dưỡng móng và sơn dưỡng bóng.", 30, 1800, null, "sunrise", "Phù hợp lịch hẹn 30 phút"],
+    [5, 2, "French tip soft", "Nền gel trong và vẽ French tip tay cong mềm.", 40, 3000, null, "cobalt", "Classic nhưng vẫn rất sang"],
+    [6, 3, "Cat eye galaxy", "Sơn gel cat eye nhiều lớp và hiệu ứng ánh kim.", 55, 3500, "Hot trend", "violet", "Lên ảnh đẹp trên iPhone"],
+    [7, 3, "Bridal crystal set", "Bộ nail cưới với charm đá, line art và builder gel.", 90, 7500, "Premium", "gold", "Dành cho ngày đặc biệt"],
+    [8, 4, "Pedicure refresh", "Làm sạch góc chân, tẩy da chết và sơn gel chân.", 50, 3200, null, "emerald", "Chân nhẹ và sạch sẽ hơn"],
+    [9, 4, "Luxury spa pedicure", "Pedicure có massage đá nóng, muối ngâm và serum phục hồi.", 65, 4800, "Thư giãn", "sand", "Rất hợp cho cuối tuần"],
+    [10, 5, "Hand recovery ritual", "Tẩy tế bào chết, massage, serum và paraffin mềm da.", 35, 2800, null, "rose", "Dưỡng ẩm và phục hồi nhanh"]
   ];
 
   const insertProvince = db.prepare(

@@ -14,10 +14,12 @@ import {
   TicketIcon,
 } from "../components/icons";
 import { formatCurrency, toneClassName } from "../formatters";
-import { useT } from "../i18n/i18n-context";
+import { useT, useLocale } from "../i18n/i18n-context";
+import { localized } from "../locale-helpers";
 
 export function HomePage() {
   const t = useT();
+  const { locale } = useLocale();
   const { data, selectedSalon, selectedServices, grandTotal } =
     useBooking();
   const featuredServices = data.services.slice(0, 4);
@@ -151,12 +153,12 @@ export function HomePage() {
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
                 <span className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-chip bg-white/20 text-white text-[10px] font-bold">
-                  {service.badge || `${service.durationMinutes} min`}
+                  {localized(service, "badge", locale) || `${service.durationMinutes} min`}
                 </span>
               </div>
               <div className="p-3">
                 <strong className="block text-sm font-bold text-brand-800 leading-snug line-clamp-1">
-                  {service.name}
+                  {localized(service, "name", locale)}
                 </strong>
                 <span className="block text-sm font-semibold text-gray-500 mt-1">
                   {formatCurrency(service.price)}
@@ -177,10 +179,10 @@ export function HomePage() {
             >
               <div className="flex-1 min-w-0">
                 <strong className="block text-sm font-bold text-brand-900">
-                  {category.name}
+                  {localized(category, "name", locale)}
                 </strong>
                 <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
-                  {category.teaser}
+                  {localized(category, "teaser", locale)}
                 </p>
               </div>
               <ChevronRightIcon width={18} height={18} className="text-gray-300 flex-shrink-0" />
