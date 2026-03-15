@@ -1,0 +1,7 @@
+name = "super-nails-v2-proxy"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+routes = [
+  { pattern = "super-nails-v2.goriant.com/*", zone_name = "goriant.com" }
+]

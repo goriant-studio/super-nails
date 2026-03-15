@@ -1,9 +1,23 @@
+# Node.js
 node_modules
 dist
 .DS_Store
+
+# Client
 client/node_modules
 client/dist
+
+# Server (legacy)
 server/node_modules
 server/data/*.sqlite
 server/data/*.sqlite-shm
 server/data/*.sqlite-wal
+
+# Cloudflare Worker / Wrangler
+cloudflare-worker/.wrangler
+cloudflare-worker-v2/.wrangler
+server-cloudflare-function/.wrangler
+server-cloudflare-function/node_modules
+
+# Rust / SpacetimeDB module
+server-cloudflare-function/spacetimedb-module/target
