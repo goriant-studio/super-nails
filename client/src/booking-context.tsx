@@ -8,9 +8,11 @@ import {
 } from "react";
 
 import { fetchSlots, submitBookingRequest } from "./api";
+import { calculateTax, TAX_RATE } from "./tax-utils";
 import type {
   BookingPayload,
   BootstrapData,
+  PaymentMethod,
   Salon,
   Service,
   Stylist,
@@ -30,6 +32,10 @@ export interface ConfirmedBooking {
   appointmentTime: string;
   serviceNames: string[];
   needsConsultation: boolean;
+  paymentMethod: PaymentMethod;
+  subtotal: number;
+  taxAmount: number;
+  tipAmount: number;
 }
 
 interface StoredBookingState {
@@ -39,6 +45,9 @@ interface StoredBookingState {
   selectedTime: string | null;
   selectedServiceIds: number[];
   needsConsultation: boolean;
+  paymentMethod: PaymentMethod;
+  tipPercent: number | null;
+  tipCustomAmount: number | null;
 }
 
 interface BookingProviderProps {
@@ -70,6 +79,20 @@ interface BookingContextValue {
   toggleService: (serviceId: number) => void;
   toggleConsultation: () => void;
   clearConfirmation: () => void;
+  // Payment
+  paymentMethod: PaymentMethod;
+  setPaymentMethod: (method: PaymentMethod) => void;
+  // Pricing breakdown
+  subtotal: number;
+  taxAmount: number;
+  tipAmount: number;
+  grandTotal: number;
+  // Tips
+  tipPercent: number | null;
+  tipCustomAmount: number | null;
+  setTipPercent: (percent: number | null) => void;
+  setTipCustom: (amount: number | null) => void;
+  // Legacy compat
   selectedTotal: number;
   canCheckout: boolean;
   submitBooking: () => Promise<void>;
@@ -80,11 +103,7 @@ const BookingContext = createContext<BookingContextValue | null>(null);
 function readStoredBookingState(): StoredBookingState | null {
   try {
     const storedValue = window.localStorage.getItem(STORAGE_KEY);
-
-    if (!storedValue) {
-      return null;
-    }
-
+    if (!storedValue) return null;
     return JSON.parse(storedValue) as StoredBookingState;
   } catch {
     return null;
@@ -95,7 +114,6 @@ function getInitialSalonId(data: BootstrapData, stored: StoredBookingState | nul
   if (stored?.selectedSalonId && data.salons.some((salon) => salon.id === stored.selectedSalonId)) {
     return stored.selectedSalonId;
   }
-
   return data.salons[0]?.id ?? null;
 }
 
@@ -139,6 +157,19 @@ export function BookingProvider({
   const [slotsForSelectedDate, setSlotsForSelectedDate] = useState<TimeSlot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
 
+  // Payment
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
+    stored?.paymentMethod ?? "card"
+  );
+
+  // Tips
+  const [tipPercent, setTipPercent] = useState<number | null>(
+    stored?.tipPercent ?? 18
+  );
+  const [tipCustomAmount, setTipCustomAmount] = useState<number | null>(
+    stored?.tipCustomAmount ?? null
+  );
+
   const selectedSalon =
     data.salons.find((salon) => salon.id === selectedSalonId) ?? null;
   const availableStylists = data.stylists.filter(
@@ -150,10 +181,21 @@ export function BookingProvider({
   const selectedServices = data.services.filter((service) =>
     selectedServiceIds.includes(service.id)
   );
-  const selectedTotal = selectedServices.reduce(
+
+  // Pricing breakdown (all in cents)
+  const subtotal = selectedServices.reduce(
     (sum, service) => sum + service.price,
     0
   );
+  const taxAmount = calculateTax(subtotal, TAX_RATE);
+  const tipAmount =
+    tipCustomAmount !== null
+      ? tipCustomAmount
+      : tipPercent !== null
+        ? Math.round(subtotal * (tipPercent / 100))
+        : 0;
+  const grandTotal = subtotal + taxAmount + tipAmount;
+  const selectedTotal = grandTotal; // legacy compat
 
   useEffect(() => {
     if (!selectedSalonId && data.salons[0]) {
@@ -166,11 +208,9 @@ export function BookingProvider({
       setSelectedStylistId(null);
       return;
     }
-
     const stylistStillValid = availableStylists.some(
       (stylist) => stylist.id === selectedStylistId
     );
-
     if (!stylistStillValid) {
       setSelectedStylistId(availableStylists[0].id);
     }
@@ -181,19 +221,14 @@ export function BookingProvider({
       setSelectedDate("");
       return;
     }
-
     if (!selectedDate || !availableDates.includes(selectedDate)) {
       setSelectedDate(availableDates[0]);
     }
   }, [availableDates, selectedDate]);
 
   useEffect(() => {
-    if (!selectedTime) {
-      return;
-    }
-
+    if (!selectedTime) return;
     const matchingSlot = slotsForSelectedDate.find((slot) => slot.time === selectedTime);
-
     if (!matchingSlot || !matchingSlot.isAvailable) {
       setSelectedTime(null);
     }
@@ -212,6 +247,7 @@ export function BookingProvider({
       .finally(() => setSlotsLoading(false));
   }, [selectedSalonId, selectedDate]);
 
+  // Persist state
   useEffect(() => {
     const payload: StoredBookingState = {
       selectedSalonId,
@@ -219,9 +255,11 @@ export function BookingProvider({
       selectedDate,
       selectedTime,
       selectedServiceIds,
-      needsConsultation
+      needsConsultation,
+      paymentMethod,
+      tipPercent,
+      tipCustomAmount,
     };
-
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   }, [
     needsConsultation,
@@ -229,7 +267,10 @@ export function BookingProvider({
     selectedSalonId,
     selectedServiceIds,
     selectedStylistId,
-    selectedTime
+    selectedTime,
+    paymentMethod,
+    tipPercent,
+    tipCustomAmount,
   ]);
 
   function resetNotices() {
@@ -283,12 +324,12 @@ export function BookingProvider({
 
   async function submitBooking() {
     if (!selectedSalon || !selectedStylist || !selectedDate || !selectedTime) {
-      setSubmissionError("Vui lòng chọn đầy đủ salon, stylist, ngày và giờ.");
+      setSubmissionError("Please select a salon, stylist, date, and time.");
       return;
     }
 
     if (!selectedServiceIds.length && !needsConsultation) {
-      setSubmissionError("Chọn ít nhất một dịch vụ hoặc bật tư vấn tại salon.");
+      setSubmissionError("Select at least one service or request a consultation.");
       return;
     }
 
@@ -302,7 +343,9 @@ export function BookingProvider({
         appointmentDate: selectedDate,
         appointmentTime: selectedTime,
         serviceIds: selectedServiceIds,
-        needsConsultation
+        needsConsultation,
+        paymentMethod,
+        tipAmount,
       };
 
       // Capture snapshot from current state BEFORE refreshData() clears availability
@@ -319,17 +362,21 @@ export function BookingProvider({
       setConfirmation({
         bookingId: apiResult.bookingId,
         confirmationCode: apiResult.confirmationCode,
-        totalAmount: apiResult.totalAmount,
+        totalAmount: grandTotal,
         salonName: snapshotSalonName,
         stylistName: snapshotStylistName,
         appointmentDate: snapshotDate,
         appointmentTime: snapshotTime,
         serviceNames: snapshotServiceNames,
-        needsConsultation: snapshotConsultation
+        needsConsultation: snapshotConsultation,
+        paymentMethod,
+        subtotal,
+        taxAmount,
+        tipAmount,
       });
     } catch (error) {
       setSubmissionError(
-        error instanceof Error ? error.message : "Không thể chốt lịch lúc này."
+        error instanceof Error ? error.message : "Unable to book at this time."
       );
     } finally {
       setSubmitting(false);
@@ -361,6 +408,16 @@ export function BookingProvider({
         toggleService,
         toggleConsultation,
         clearConfirmation,
+        paymentMethod,
+        setPaymentMethod,
+        subtotal,
+        taxAmount,
+        tipAmount,
+        grandTotal,
+        tipPercent,
+        tipCustomAmount,
+        setTipPercent,
+        setTipCustom: setTipCustomAmount,
         selectedTotal,
         canCheckout,
         submitBooking

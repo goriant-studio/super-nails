@@ -14,33 +14,35 @@ import {
   TicketIcon,
 } from "../components/icons";
 import { formatCurrency, toneClassName } from "../formatters";
-
-const quickLinks = [
-  {
-    label: "Ưu đãi",
-    description: "Voucher và combo hot",
-    to: "/services",
-    icon: <TicketIcon width={22} height={22} />,
-  },
-  {
-    label: "Cam kết",
-    description: "Dịch vụ và vệ sinh",
-    to: "/booking",
-    icon: <ShieldCheckIcon width={22} height={22} />,
-  },
-  {
-    label: "Hệ thống",
-    description: "Tất cả salon",
-    to: "/salons",
-    icon: <GlobeIcon width={22} height={22} />,
-  },
-];
+import { useT } from "../i18n/i18n-context";
 
 export function HomePage() {
-  const { data, selectedSalon, selectedServices, selectedTotal, selectedDate } =
+  const t = useT();
+  const { data, selectedSalon, selectedServices, grandTotal } =
     useBooking();
   const featuredServices = data.services.slice(0, 4);
   const categoryHighlights = data.categories.slice(0, 3);
+
+  const quickLinks = [
+    {
+      label: t("home.section_services"),
+      description: t("nav.services"),
+      to: "/services",
+      icon: <TicketIcon width={22} height={22} />,
+    },
+    {
+      label: t("nav.booking"),
+      description: t("home.cta_book"),
+      to: "/booking",
+      icon: <ShieldCheckIcon width={22} height={22} />,
+    },
+    {
+      label: t("home.section_salons"),
+      description: t("salon.title"),
+      to: "/salons",
+      icon: <GlobeIcon width={22} height={22} />,
+    },
+  ];
 
   return (
     <MobileShell className="bg-surface-muted">
@@ -54,15 +56,17 @@ export function HomePage() {
 
           {/* Profile info */}
           <div className="flex-1 min-w-0">
-            <h1 className="font-heading text-xl font-bold leading-tight">Chào bạn!</h1>
+            <h1 className="font-heading text-xl font-bold leading-tight">
+              {t("home.hero_title")}
+            </h1>
             <p className="text-white/75 text-sm font-medium mt-0.5">
-              Sẵn sàng đặt lịch làm đẹp
+              {t("home.hero_subtitle")}
             </p>
             <Link
               className="inline-flex items-center gap-1 text-white text-sm font-semibold mt-1"
               to="/booking"
             >
-              Đặt lịch ngay
+              {t("home.cta_book")}
               <ChevronRightIcon width={14} height={14} />
             </Link>
           </div>
@@ -98,11 +102,8 @@ export function HomePage() {
             <div className="w-14 h-14 flex-shrink-0 rounded-card bg-gradient-to-br from-rose-200 to-rose-400 shadow-inner" />
             <div className="flex-1 min-w-0">
               <strong className="block text-sm font-bold text-brand-700 leading-snug">
-                Mời anh đánh giá chất lượng phục vụ
+                {t("tour.feedback_title")}
               </strong>
-              <p className="text-xs text-brand-600/70 mt-1 leading-snug">
-                Phản hồi giúp chúng em cải thiện trải nghiệm tốt hơn.
-              </p>
               <div className="flex gap-1 mt-1.5 text-amber-400">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <StarIcon key={i} width={16} height={16} />
@@ -116,23 +117,23 @@ export function HomePage() {
         <div className="relative rounded-card-lg overflow-hidden bg-gradient-to-br from-brand-600 to-brand-800 text-white p-5 shadow-lg mb-5">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
           <span className="inline-flex px-2.5 py-1 rounded-chip bg-white/15 text-[11px] font-bold uppercase tracking-wider mb-2">
-            Combo nổi bật
+            {t("home.section_services")}
           </span>
           <h2 className="font-heading text-lg font-bold leading-snug">
-            Đặt lịch gọn trong 30 giây
+            {t("home.cta_book")}
           </h2>
           <p className="text-white/75 text-sm mt-1.5 leading-snug">
             {selectedSalon
-              ? `Đang ưu tiên ${selectedSalon.shortAddress}`
-              : "Chọn salon gần anh, chọn stylist và chốt giờ nhanh."}
+              ? selectedSalon.shortAddress
+              : t("home.hero_subtitle")}
           </p>
           <div className="mt-3 inline-flex px-3 py-1.5 rounded-card bg-white/15 font-heading text-base font-bold">
-            {selectedServices.length ? formatCurrency(selectedTotal) : "Từ 122.000₫"}
+            {selectedServices.length ? formatCurrency(grandTotal) : formatCurrency(3000)}
           </div>
         </div>
 
         {/* Featured services */}
-        <SectionHeader title="Dịch vụ tóc" />
+        <SectionHeader title={t("home.section_services")} />
         <div className="grid grid-cols-2 gap-3 mb-5">
           {featuredServices.map((service) => (
             <Link
@@ -150,7 +151,7 @@ export function HomePage() {
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
                 <span className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-chip bg-white/20 text-white text-[10px] font-bold">
-                  {service.badge || `${service.durationMinutes} phút`}
+                  {service.badge || `${service.durationMinutes} min`}
                 </span>
               </div>
               <div className="p-3">
@@ -166,7 +167,7 @@ export function HomePage() {
         </div>
 
         {/* Category highlights */}
-        <SectionHeader title="Để anh chọn nhanh hơn" />
+        <SectionHeader title={t("nav.services")} />
         <div className="space-y-2 mb-5">
           {categoryHighlights.map((category) => (
             <Link
@@ -190,24 +191,20 @@ export function HomePage() {
         {/* Booking CTA */}
         <div className="bg-gradient-to-br from-brand-600 to-brand-800 text-white rounded-card-lg p-5 shadow-lg">
           <span className="inline-flex px-2.5 py-1 rounded-chip bg-white/15 text-[10px] font-bold uppercase tracking-wider mb-2">
-            Đặt lịch giữ chỗ
+            {t("nav.booking")}
           </span>
           <h2 className="font-heading text-lg font-bold leading-snug">
-            {selectedDate
-              ? `Đã giữ dữ liệu cho ngày ${selectedDate}`
-              : "Bắt đầu quy trình booking"}
+            {t("home.cta_book")}
           </h2>
           <p className="text-white/75 text-sm mt-1.5 leading-snug">
-            {selectedServices.length
-              ? `Đã chọn ${selectedServices.length} dịch vụ, tiếp tục để chốt giờ.`
-              : "Chọn salon, ngày giờ và dịch vụ theo đúng flow mobile-first."}
+            {t("home.hero_subtitle")}
           </p>
           <Link
             className="mt-4 inline-flex items-center gap-2 px-5 py-3 rounded-button bg-white text-brand-700 font-bold shadow-md hover:bg-gray-50 active:scale-95 transition-all"
             to="/booking"
           >
             <CalendarIcon width={18} height={18} />
-            Đặt lịch ngay
+            {t("home.cta_book")}
           </Link>
         </div>
       </main>

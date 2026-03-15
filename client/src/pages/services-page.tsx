@@ -9,14 +9,20 @@ import { ServiceCard } from "../components/service-card";
 import { StickySummaryBar } from "../components/StickySummaryBar";
 import { CheckIcon, SearchIcon } from "../components/icons";
 import { SectionHeader } from "../components/SectionHeader";
+import { useT, useLocale } from "../i18n/i18n-context";
 
 export function ServicesPage() {
   const navigate = useNavigate();
+  const t = useT();
+  const { locale } = useLocale();
   const {
     data,
     selectedServiceIds,
     selectedServices,
-    selectedTotal,
+    subtotal,
+    taxAmount,
+    tipAmount,
+    grandTotal,
     needsConsultation,
     toggleService,
     toggleConsultation,
@@ -45,7 +51,7 @@ export function ServicesPage() {
 
   return (
     <MobileShell>
-      <AppHeader title="Chọn dịch vụ" />
+      <AppHeader title={t("services.title")} />
 
       <main className="px-4 py-4 pb-40">
         {/* Search */}
@@ -54,7 +60,7 @@ export function ServicesPage() {
           <input
             className="flex-1 min-w-0 bg-transparent outline-none text-sm text-brand-900 placeholder:text-gray-400"
             onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Tìm kiếm dịch vụ, nhóm dịch vụ"
+            placeholder={t("salon.search_placeholder")}
             type="search"
             value={searchTerm}
           />
@@ -63,7 +69,7 @@ export function ServicesPage() {
         {/* Category chips */}
         <div className="flex flex-wrap gap-2 mt-3">
           <FilterChip
-            label="Tất cả"
+            label={locale === "vi" ? "Tất cả" : "All"}
             active={activeCategory === "all"}
             onClick={() => setActiveCategory("all")}
           />
@@ -122,11 +128,8 @@ export function ServicesPage() {
           />
           <span>
             <strong className="block text-sm font-bold text-brand-700">
-              Chưa biết chọn dịch vụ gì?
+              {t("booking.consultation")}
             </strong>
-            <small className="block text-xs text-gray-400 mt-1">
-              Nhân viên sẽ giúp bạn chọn dịch vụ phù hợp tại cửa hàng.
-            </small>
           </span>
         </label>
       </main>
@@ -134,9 +137,14 @@ export function ServicesPage() {
       {/* Sticky summary bar */}
       <StickySummaryBar
         count={selectedServices.length}
-        total={selectedTotal}
+        subtotal={subtotal}
+        taxAmount={taxAmount}
+        tipAmount={tipAmount}
+        total={grandTotal}
         ctaLabel={
-          selectedServices.length || needsConsultation ? "Xong" : "Quay lại"
+          selectedServices.length || needsConsultation
+            ? t("services.continue")
+            : t("common.back")
         }
         ctaIcon={
           selectedServices.length || needsConsultation ? (
