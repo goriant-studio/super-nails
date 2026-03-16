@@ -466,8 +466,8 @@ function buildSlotRows() {
       times.forEach((time, index) => {
         const hour = Number(time.split(":")[0]);
         const isPeak = weekend || hour >= 18 ? 1 : 0;
-        const busyPattern = (salon.id * 11 + dayOffset * 5 + index) % 9;
-        const isAvailable = busyPattern === 0 && hour >= 21 ? 0 : busyPattern > 1 ? 1 : 0;
+        // All slots start available — bookings mark them unavailable
+        const isAvailable = 1;
 
         rows.push([salon.id, isoDate, time, isPeak, isAvailable]);
       });
