@@ -459,7 +459,7 @@ pub fn refresh_time_slots(ctx: &ReducerContext) {
             let wd = weekday_from_date(&date);
             let weekend = wd == 0 || wd == 6;
 
-            for (slot_index, &time) in TIME_SLOTS.iter().enumerate() {
+            for (_slot_index, &time) in TIME_SLOTS.iter().enumerate() {
                 // Skip if slot already exists (preserves booking state)
                 let exists = ctx.db.time_slot().iter()
                     .any(|s| s.salon_id == salon_id && s.slot_date == date && s.slot_time == time);

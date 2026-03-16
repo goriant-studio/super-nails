@@ -188,7 +188,7 @@ async function handleStatic(request, env, ctx, origin) {
         SELECT s.id, s.province_id, p.name AS province_name, s.name, s.district, s.city,
                s.street, s.short_address, s.note, s.travel_minutes, s.distance_km,
                s.nearby, s.parking, s.premium, s.hero_tone, s.gallery_json
-        FROM salons s JOIN provinces p ON p.id = s.province_id
+        FROM salon s JOIN province p ON p.id = s.province_id
         ORDER BY s.nearby DESC, s.premium DESC, s.distance_km ASC
       `);
       const salonsRaw = rows[0]?.rows ?? [];
@@ -199,16 +199,16 @@ async function handleStatic(request, env, ctx, origin) {
         gallery: JSON.parse(r[15] ?? "[]"),
       }));
 
-      const stylistRows = (await stdbSql(env, "SELECT id, salon_id, name, title, specialty, accent FROM stylists ORDER BY salon_id, id"))[0]?.rows ?? [];
+      const stylistRows = (await stdbSql(env, "SELECT id, salon_id, name, title, specialty, accent FROM stylist ORDER BY salon_id, id"))[0]?.rows ?? [];
       const stylists = stylistRows.map(r => ({ id: r[0], salonId: r[1], name: r[2], title: r[3], specialty: r[4], accent: r[5] }));
 
-      const catRows = (await stdbSql(env, "SELECT id, slug, name, teaser FROM service_categories ORDER BY id"))[0]?.rows ?? [];
+      const catRows = (await stdbSql(env, "SELECT id, slug, name, teaser FROM service_category ORDER BY id"))[0]?.rows ?? [];
       const categories = catRows.map(r => ({ id: r[0], slug: r[1], name: r[2], teaser: r[3] }));
 
-      const svcRows = (await stdbSql(env, "SELECT id, category_id, name, description, duration_minutes, price, badge, accent, tagline FROM services ORDER BY id"))[0]?.rows ?? [];
+      const svcRows = (await stdbSql(env, "SELECT id, category_id, name, description, duration_minutes, price, badge, accent, tagline FROM service ORDER BY id"))[0]?.rows ?? [];
       const services = svcRows.map(r => ({ id: r[0], categoryId: r[1], name: r[2], description: r[3], durationMinutes: r[4], price: r[5], badge: r[6] ?? null, accent: r[7], tagline: r[8] }));
 
-      const provRows = (await stdbSql(env, "SELECT id, name, region FROM provinces ORDER BY name"))[0]?.rows ?? [];
+      const provRows = (await stdbSql(env, "SELECT id, name, region FROM province ORDER BY name"))[0]?.rows ?? [];
       const provinces = provRows.map(r => ({ id: r[0], name: r[1], region: r[2] }));
 
       data = { generatedAt: new Date().toISOString(), provinces, salons, stylists, categories, services };
@@ -257,7 +257,7 @@ async function handleSlots(request, env, ctx, origin) {
     try {
       const rows = await stdbSql(env, `
         SELECT id, salon_id, slot_date, slot_time, is_peak, is_available
-        FROM time_slots
+        FROM time_slot
         WHERE salon_id = ${salonId} AND slot_date = '${date}'
         ORDER BY slot_time
       `);

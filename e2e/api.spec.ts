@@ -99,12 +99,19 @@ test.describe("API — /api/slots", () => {
 test.describe("API — /api/bookings POST", () => {
   test("valid payload returns 201 with confirmationCode", async ({ request }) => {
     const date = todayVN();
+
+    // Fetch an available slot dynamically (production-safe: slots get booked permanently)
+    const slotsRes = await request.get(`${WORKER_URL}/api/slots?salonId=1&date=${date}`);
+    const slots = await slotsRes.json();
+    const available = slots.find((s: { isAvailable: boolean }) => s.isAvailable);
+    test.skip(!available, "No available slots left for today — cannot test booking");
+
     const res = await request.post(`${WORKER_URL}/api/bookings`, {
       data: {
         salonId: 1,
         stylistId: 1,
         appointmentDate: date,
-        appointmentTime: "14:00",
+        appointmentTime: available!.time,
         serviceIds: [1],
         needsConsultation: false,
         customerName: "E2E Test User",
