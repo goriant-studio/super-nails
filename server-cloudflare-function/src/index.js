@@ -184,32 +184,46 @@ async function handleStatic(request, env, ctx, origin) {
   let data;
   if (env.SPACETIMEDB_TOKEN) {
     try {
-      const rows = await stdbSql(env, `
-        SELECT s.id, s.province_id, p.name AS province_name, s.name, s.district, s.city,
-               s.street, s.short_address, s.note, s.travel_minutes, s.distance_km,
-               s.nearby, s.parking, s.premium, s.hero_tone, s.gallery_json
-        FROM salon s JOIN province p ON p.id = s.province_id
-        ORDER BY s.nearby DESC, s.premium DESC, s.distance_km ASC
-      `);
-      const salonsRaw = rows[0]?.rows ?? [];
-      const salons = salonsRaw.map(r => ({
-        id: r[0], provinceId: r[1], provinceName: r[2], name: r[3], district: r[4],
-        city: r[5], street: r[6], shortAddress: r[7], note: r[8], travelMinutes: r[9],
-        distanceKm: r[10], nearby: r[11], parking: r[12], premium: r[13], heroTone: r[14],
-        gallery: JSON.parse(r[15] ?? "[]"),
-      }));
+      // SpacetimeDB REST SQL only supports simple SELECT * — filter/sort/join in JS
+      const [salonResult] = await stdbSql(env, "SELECT * FROM salon");
+      const [provResult] = await stdbSql(env, "SELECT * FROM province");
+      const [stylistResult] = await stdbSql(env, "SELECT * FROM stylist");
+      const [catResult] = await stdbSql(env, "SELECT * FROM service_category");
+      const [svcResult] = await stdbSql(env, "SELECT * FROM service");
 
-      const stylistRows = (await stdbSql(env, "SELECT id, salon_id, name, title, specialty, accent FROM stylist ORDER BY salon_id, id"))[0]?.rows ?? [];
-      const stylists = stylistRows.map(r => ({ id: r[0], salonId: r[1], name: r[2], title: r[3], specialty: r[4], accent: r[5] }));
+      const provMap = new Map();
+      for (const r of provResult?.rows ?? []) {
+        // province schema: id, name, name_en, name_vi, region
+        provMap.set(r[0], { id: r[0], name: r[1], region: r[4] });
+      }
+      const provinces = [...provMap.values()].sort((a, b) => a.name.localeCompare(b.name));
 
-      const catRows = (await stdbSql(env, "SELECT id, slug, name, teaser FROM service_category ORDER BY id"))[0]?.rows ?? [];
-      const categories = catRows.map(r => ({ id: r[0], slug: r[1], name: r[2], teaser: r[3] }));
+      const salons = (salonResult?.rows ?? []).map(r => {
+        // salon schema: id, province_id, name, name_en, name_vi, district, city, street, short_address, note, note_en, note_vi, travel_minutes, distance_km, nearby, parking, premium, hero_tone, gallery_json
+        const prov = provMap.get(r[1]);
+        return {
+          id: r[0], provinceId: r[1], provinceName: prov?.name ?? "", name: r[2],
+          district: r[5], city: r[6], street: r[7], shortAddress: r[8],
+          note: r[9], travelMinutes: r[12], distanceKm: r[13],
+          nearby: r[14], parking: r[15], premium: r[16], heroTone: r[17],
+          gallery: JSON.parse(r[18] ?? "[]"),
+        };
+      }).sort((a, b) => (b.nearby - a.nearby) || (b.premium - a.premium) || (a.distanceKm - b.distanceKm));
 
-      const svcRows = (await stdbSql(env, "SELECT id, category_id, name, description, duration_minutes, price, badge, accent, tagline FROM service ORDER BY id"))[0]?.rows ?? [];
-      const services = svcRows.map(r => ({ id: r[0], categoryId: r[1], name: r[2], description: r[3], durationMinutes: r[4], price: r[5], badge: r[6] ?? null, accent: r[7], tagline: r[8] }));
+      const stylists = (stylistResult?.rows ?? []).map(r => (
+        // stylist schema: id, salon_id, name, title, title_en, title_vi, specialty, specialty_en, specialty_vi, accent
+        { id: r[0], salonId: r[1], name: r[2], title: r[3], specialty: r[6], accent: r[9] }
+      )).sort((a, b) => a.salonId - b.salonId || a.id - b.id);
 
-      const provRows = (await stdbSql(env, "SELECT id, name, region FROM province ORDER BY name"))[0]?.rows ?? [];
-      const provinces = provRows.map(r => ({ id: r[0], name: r[1], region: r[2] }));
+      const categories = (catResult?.rows ?? []).map(r => (
+        // service_category schema: id, slug, name, name_en, name_vi, teaser, teaser_en, teaser_vi
+        { id: r[0], slug: r[1], name: r[2], teaser: r[5] }
+      )).sort((a, b) => a.id - b.id);
+
+      const services = (svcResult?.rows ?? []).map(r => (
+        // service schema: id, category_id, name, name_en, name_vi, description, description_en, description_vi, duration_minutes, price, badge, badge_en, badge_vi, accent, tagline, tagline_en, tagline_vi
+        { id: r[0], categoryId: r[1], name: r[2], description: r[5], durationMinutes: r[8], price: r[9], badge: r[10] ?? null, accent: r[13], tagline: r[14] }
+      )).sort((a, b) => a.id - b.id);
 
       data = { generatedAt: new Date().toISOString(), provinces, salons, stylists, categories, services };
     } catch (err) {
@@ -255,17 +269,17 @@ async function handleSlots(request, env, ctx, origin) {
   let slots;
   if (env.SPACETIMEDB_TOKEN) {
     try {
-      const rows = await stdbSql(env, `
-        SELECT id, salon_id, slot_date, slot_time, is_peak, is_available
-        FROM time_slot
-        WHERE salon_id = ${salonId} AND slot_date = '${date}'
-        ORDER BY slot_time
-      `);
-      const raw = rows[0]?.rows ?? [];
-      slots = raw.map(r => ({
-        id: r[0], salonId: r[1], date: r[2], time: r[3],
-        isPeak: Boolean(r[4]), isAvailable: Boolean(r[5]),
-      }));
+      // SpacetimeDB REST SQL: simple SELECT only, filter in JS
+      const [result] = await stdbSql(env, "SELECT * FROM time_slot");
+      const allSlots = result?.rows ?? [];
+      // schema: id, salon_id, slot_date, slot_time, is_peak, is_available
+      slots = allSlots
+        .filter(r => r[1] === salonId && r[2] === date)
+        .map(r => ({
+          id: r[0], salonId: r[1], date: r[2], time: r[3],
+          isPeak: Boolean(r[4]), isAvailable: Boolean(r[5]),
+        }))
+        .sort((a, b) => a.time.localeCompare(b.time));
     } catch (err) {
       console.error("STDB slots fetch failed, using JS fallback:", err.message);
       // Determine day offset for this date from today
