@@ -3,6 +3,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode
 } from "react";
@@ -118,13 +119,19 @@ function getInitialSalonId(data: BootstrapData, stored: StoredBookingState | nul
   return data.salons[0]?.id ?? null;
 }
 
-/** Generate next 6 available dates from today (VN time, UTC+7). */
+/** Generate next 6 available dates from today (VN time, Asia/Ho_Chi_Minh). */
 function getNextSixDates(): string[] {
   const dates: string[] = [];
-  const now = new Date(Date.now() + 7 * 3600 * 1000);
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const todayStr = formatter.format(new Date()); // YYYY-MM-DD in VN time
+  const todayMs = new Date(todayStr + "T00:00:00").getTime();
   for (let i = 0; i < 6; i++) {
-    const d = new Date(now);
-    d.setUTCDate(now.getUTCDate() + i);
+    const d = new Date(todayMs + i * 86400000);
     dates.push(d.toISOString().slice(0, 10));
   }
   return dates;
@@ -135,7 +142,8 @@ export function BookingProvider({
   data,
   refreshData
 }: BookingProviderProps) {
-  const stored = readStoredBookingState();
+  // #15: Only read localStorage once via useMemo
+  const stored = useMemo(() => readStoredBookingState(), []);
   const [selectedSalonId, setSelectedSalonId] = useState<number | null>(() =>
     getInitialSalonId(data, stored)
   );

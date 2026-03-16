@@ -2,11 +2,14 @@
 description: Create PR, merge to master, and deploy to production (GitHub Pages + Cloudflare Worker)
 ---
 
+// turbo-all
+
 # Deploy to Production
 
 This workflow creates a feature branch, commits changes, creates a PR, merges it, and production deploys automatically via GitHub Actions.
 
 ## Prerequisites
+
 - `gh` CLI installed and authenticated (`gh auth status`)
 - All checks passing (`./AGENTS.sh typecheck && ./AGENTS.sh build`)
 
@@ -15,6 +18,7 @@ This workflow creates a feature branch, commits changes, creates a PR, merges it
 ### 1. Verify checks pass before creating PR
 
 // turbo
+
 ```bash
 cd /Users/lamle/Development/SuperNails && ./AGENTS.sh typecheck && ./AGENTS.sh build
 ```
@@ -54,6 +58,7 @@ cd /Users/lamle/Development/SuperNails && gh pr merge --squash --delete-branch
 ### 7. Switch back to master and pull
 
 // turbo
+
 ```bash
 cd /Users/lamle/Development/SuperNails && git checkout master && git pull origin master
 ```
@@ -61,13 +66,13 @@ cd /Users/lamle/Development/SuperNails && git checkout master && git pull origin
 ### 8. Verify deployment
 
 After merging to `master`, GitHub Actions automatically:
+
 - Builds the client (`npm --prefix client run build`)
 - Deploys to **GitHub Pages** (static frontend)
 - Deploys **Cloudflare Worker** (reverse proxy at `super-nails.goriant.com`)
 
 Check deployment status:
 
-// turbo
 ```bash
 cd /Users/lamle/Development/SuperNails && gh run list --limit 3
 ```
@@ -81,6 +86,7 @@ cd /Users/lamle/Development/SuperNails && gh run watch
 ### 9. Verify production site
 
 Open the production URL to verify:
+
 - GitHub Pages: `https://goriant-studio.github.io/super-nails/`
 - Custom domain: `https://super-nails.goriant.com/`
 

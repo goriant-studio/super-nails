@@ -6,6 +6,7 @@ import { MobileShell } from "../components/MobileShell";
 import { CheckIcon } from "../components/icons";
 import { useT } from "../i18n/i18n-context";
 import { formatCurrency } from "../formatters";
+import { getTaxRateDisplay, TAX_RATE } from "../tax-utils";
 
 export function SuccessPage() {
   const t = useT();
@@ -101,8 +102,8 @@ export function SuccessPage() {
                 {t("receipt.services")}
               </p>
               <div className="space-y-1.5">
-                {confirmation.serviceNames.map((name, i) => (
-                  <div key={i} className="flex justify-between text-sm">
+                {confirmation.serviceNames.map((name) => (
+                  <div key={name} className="flex justify-between text-sm">
                     <span className="text-brand-900">{name}</span>
                   </div>
                 ))}
@@ -117,7 +118,7 @@ export function SuccessPage() {
               <span>{formatCurrency(confirmation.subtotal)}</span>
             </div>
             <div className="flex justify-between text-gray-500">
-              <span>{t("summary.tax", { rate: "8.875" })}</span>
+              <span>{t("summary.tax", { rate: getTaxRateDisplay(TAX_RATE) })}</span>
               <span>{formatCurrency(confirmation.taxAmount)}</span>
             </div>
             {confirmation.tipAmount > 0 && (

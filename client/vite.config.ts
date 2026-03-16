@@ -8,10 +8,8 @@ export default defineConfig(({ command }) => ({
     host: true,
     port: 5173,
     proxy: {
-      "/api": {
-        target: "http://localhost:3001",
-        changeOrigin: true
-      }
+      // Proxy all API endpoints to Express server
+      "/api": { target: "http://localhost:3001", changeOrigin: true },
     }
   }
 }));
