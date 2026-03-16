@@ -109,10 +109,10 @@ async function stdbSql(env, query) {
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "text/plain",
         "Authorization": `Bearer ${env.SPACETIMEDB_TOKEN}`,
       },
-      body: JSON.stringify({ query }),
+      body: query,
     }
   );
   if (!resp.ok) throw new Error(`STDB SQL error ${resp.status}: ${await resp.text()}`);
