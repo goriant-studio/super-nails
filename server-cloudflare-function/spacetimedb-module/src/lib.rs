@@ -460,19 +460,18 @@ pub fn refresh_time_slots(ctx: &ReducerContext) {
             let weekend = wd == 0 || wd == 6;
 
             for (slot_index, &time) in TIME_SLOTS.iter().enumerate() {
-                // Skip if slot already exists
+                // Skip if slot already exists (preserves booking state)
                 let exists = ctx.db.time_slot().iter()
                     .any(|s| s.salon_id == salon_id && s.slot_date == date && s.slot_time == time);
                 if exists { continue; }
 
                 let hour: u32 = time.split(':').next().unwrap_or("0").parse().unwrap_or(0);
                 let is_peak = weekend || hour >= 18;
-                let busy = ((salon_id * 11) + (day_offset as u32 * 5) + slot_index as u32) % 9;
-                let is_available = if busy == 0 && hour >= 21 { false } else { busy > 1 };
 
+                // New slots are always available — bookings mark them unavailable
                 ctx.db.time_slot().insert(TimeSlot {
                     id: 0, salon_id, slot_date: date.clone(), slot_time: time.into(),
-                    is_peak, is_available,
+                    is_peak, is_available: true,
                 });
             }
         }

@@ -148,9 +148,8 @@ function generateSlotsForSalonAndDate(salonId, dateStr, dayOffset) {
   return TIMES.map((time, slotIndex) => {
     const hour = parseInt(time.split(":")[0], 10);
     const isPeak = weekend || hour >= 18;
-    const busyPattern = ((salonId * 11) + (dayOffset * 5) + slotIndex) % 9;
-    const isAvailable = busyPattern === 0 && hour >= 21 ? false : busyPattern > 1;
-    return { id: salonId * 10000 + dayOffset * 100 + slotIndex, salonId, date: dateStr, time, isPeak, isAvailable };
+    // All slots start available — bookings mark them unavailable
+    return { id: salonId * 10000 + dayOffset * 100 + slotIndex, salonId, date: dateStr, time, isPeak, isAvailable: true };
   });
 }
 
@@ -251,16 +250,7 @@ async function handleSlots(request, env, ctx, origin) {
     return errorResponse("date must be in YYYY-MM-DD format", 400, origin);
   }
 
-  // Cache per (salonId, date) — 1 min
-  const cache = caches.default;
-  const cacheKey = new Request(`https://cache.internal/api/slots/${salonId}/${date}`);
-  let cached = await cache.match(cacheKey);
-  if (cached) {
-    const body = await cached.text();
-    return new Response(body, {
-      headers: { "Content-Type": "application/json; charset=utf-8", ...corsHeaders(origin), "X-Cache": "HIT" },
-    });
-  }
+  // No caching for slots — availability is real-time
 
   let slots;
   if (env.SPACETIMEDB_TOKEN) {
@@ -293,10 +283,8 @@ async function handleSlots(request, env, ctx, origin) {
     slots = generateSlotsForSalonAndDate(salonId, date, dayOffset);
   }
 
+  // No cache for slots — availability changes on every booking
   const body = JSON.stringify(slots);
-  ctx.waitUntil(cache.put(cacheKey, new Response(body, {
-    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "s-maxage=60" },
-  })));
 
   return new Response(body, {
     status: 200,
