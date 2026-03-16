@@ -312,7 +312,7 @@ async function handleCreateBooking(request, env, origin) {
     return errorResponse("Invalid JSON body", 400, origin);
   }
 
-  const { salonId, stylistId, appointmentDate, appointmentTime, serviceIds, needsConsultation = false, customerName = "Guest" } = payload;
+  const { salonId, stylistId, appointmentDate, appointmentTime, serviceIds, needsConsultation = false, customerName = "Guest", paymentMethod = "cash", tipAmount = 0 } = payload;
 
   // Basic validation
   if (!salonId || !stylistId || !appointmentDate || !appointmentTime || !Array.isArray(serviceIds)) {
@@ -326,7 +326,7 @@ async function handleCreateBooking(request, env, origin) {
     try {
       await stdbReduce(env, "create_booking", [
         salonId, stylistId, appointmentDate, appointmentTime,
-        serviceIds, needsConsultation, customerName,
+        serviceIds, needsConsultation, customerName, paymentMethod, tipAmount,
       ]);
       // Generate confirmation code
       const code = `SN-${String(salonId).padStart(2, "0")}${Date.now().toString(36).toUpperCase().slice(-4)}`;
