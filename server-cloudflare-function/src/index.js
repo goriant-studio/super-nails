@@ -2,7 +2,7 @@
 // Routes: /api/health, /api/static, /api/slots, /api/bookings
 
 const STDB_BASE = "https://maincloud.spacetimedb.com";
-const STDB_MODULE = "super_nails"; // underscore — dashes not allowed in STDB module names
+const STDB_MODULE = "supernails"; // must match spacetime publish name
 
 const ALLOWED_ORIGINS = [
   "https://goriant-studio.github.io",

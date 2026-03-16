@@ -1,10 +1,10 @@
-use spacetimedb::{table, reducer, Table, ReducerContext};
+use spacetimedb::{table, reducer, Table, ReducerContext, UniqueColumn};
 
 // ─────────────────────────────────────────────
 // Tables
 // ─────────────────────────────────────────────
 
-#[table(name = provinces, public)]
+#[table(accessor = province, public)]
 pub struct Province {
     #[primary_key]
     #[auto_inc]
@@ -15,7 +15,7 @@ pub struct Province {
     pub region: String,
 }
 
-#[table(name = salons, public)]
+#[table(accessor = salon, public)]
 pub struct Salon {
     #[primary_key]
     #[auto_inc]
@@ -40,7 +40,7 @@ pub struct Salon {
     pub gallery_json: String,
 }
 
-#[table(name = stylists, public)]
+#[table(accessor = stylist, public)]
 pub struct Stylist {
     #[primary_key]
     #[auto_inc]
@@ -56,7 +56,7 @@ pub struct Stylist {
     pub accent: String,
 }
 
-#[table(name = service_categories, public)]
+#[table(accessor = service_category, public)]
 pub struct ServiceCategory {
     #[primary_key]
     #[auto_inc]
@@ -70,7 +70,7 @@ pub struct ServiceCategory {
     pub teaser_vi: String,
 }
 
-#[table(name = services, public)]
+#[table(accessor = service, public)]
 pub struct Service {
     #[primary_key]
     #[auto_inc]
@@ -94,7 +94,7 @@ pub struct Service {
     pub tagline_vi: String,
 }
 
-#[table(name = time_slots, public)]
+#[table(accessor = time_slot, public)]
 pub struct TimeSlot {
     #[primary_key]
     #[auto_inc]
@@ -106,7 +106,7 @@ pub struct TimeSlot {
     pub is_available: bool,
 }
 
-#[table(name = bookings, public)]
+#[table(accessor = booking, public)]
 pub struct Booking {
     #[primary_key]
     #[auto_inc]
@@ -130,7 +130,7 @@ pub struct Booking {
     pub created_at: String,
 }
 
-#[table(name = booking_services, public)]
+#[table(accessor = booking_service, public)]
 pub struct BookingService {
     #[primary_key]
     #[auto_inc]
@@ -139,7 +139,7 @@ pub struct BookingService {
     pub service_id: u32,
 }
 
-#[table(name = booking_statuses, public)]
+#[table(accessor = booking_status, public)]
 pub struct BookingStatus {
     #[primary_key]
     #[auto_inc]
@@ -149,7 +149,7 @@ pub struct BookingStatus {
     pub changed_at: String,
 }
 
-#[table(name = feedbacks, public)]
+#[table(accessor = feedback, public)]
 pub struct Feedback {
     #[primary_key]
     #[auto_inc]
@@ -247,7 +247,7 @@ pub fn init(ctx: &ReducerContext) {
 #[reducer]
 pub fn seed_static_data(ctx: &ReducerContext) {
     // Only seed if provinces table is empty
-    if ctx.db.provinces().iter().next().is_some() {
+    if ctx.db.province().iter().next().is_some() {
         return;
     }
 
@@ -262,7 +262,7 @@ pub fn seed_static_data(ctx: &ReducerContext) {
         (7, "Dong Nai", "Dong Nai", "Đồng Nai", "Mien Nam"),
         (8, "Khanh Hoa", "Khanh Hoa", "Khánh Hòa", "Mien Trung"),
     ] {
-        ctx.db.provinces().insert(Province {
+        ctx.db.province().insert(Province {
             id, name: name.into(), name_en: name_en.into(), name_vi: name_vi.into(),
             region: region.into(),
         });
@@ -314,7 +314,7 @@ pub fn seed_static_data(ctx: &ReducerContext) {
          11, 4.2, true, true, true, "sand", ""),
     ];
     for &(id, province_id, name, name_en, name_vi, district, city, street, short_address, note_en, note_vi, gallery_json, travel_minutes, distance_km, nearby, parking, premium, hero_tone, _) in salons {
-        ctx.db.salons().insert(Salon {
+        ctx.db.salon().insert(Salon {
             id, province_id, name: name.into(), name_en: name_en.into(), name_vi: name_vi.into(),
             district: district.into(), city: city.into(), street: street.into(),
             short_address: short_address.into(),
@@ -350,7 +350,7 @@ pub fn seed_static_data(ctx: &ReducerContext) {
          "Recovery spa and premium polish", "Recovery spa và premium polish", "sand"),
     ];
     for &(id, salon_id, name, title, title_en, title_vi, specialty_en, specialty_vi, accent) in stylists {
-        ctx.db.stylists().insert(Stylist {
+        ctx.db.stylist().insert(Stylist {
             id, salon_id, name: name.into(),
             title: title.into(), title_en: title_en.into(), title_vi: title_vi.into(),
             specialty: specialty_en.into(), specialty_en: specialty_en.into(), specialty_vi: specialty_vi.into(),
@@ -372,7 +372,7 @@ pub fn seed_static_data(ctx: &ReducerContext) {
          "Hand and foot massage and skin recovery", "Massage tay chân và phục hồi da", ""),
     ];
     for &(id, slug, name, name_en, name_vi, teaser_en, teaser_vi, _) in categories {
-        ctx.db.service_categories().insert(ServiceCategory {
+        ctx.db.service_category().insert(ServiceCategory {
             id, slug: slug.into(), name: name.into(),
             name_en: name_en.into(), name_vi: name_vi.into(),
             teaser: teaser_en.into(), teaser_en: teaser_en.into(), teaser_vi: teaser_vi.into(),
@@ -433,7 +433,7 @@ pub fn seed_static_data(ctx: &ReducerContext) {
          "Quick moisturizing and recovery", "Dưỡng ẩm và phục hồi nhanh"),
     ];
     for &(id, category_id, name, name_en, name_vi, description_en, description_vi, duration_minutes, price, badge, badge_en, badge_vi, accent, tagline_en, tagline_vi) in services {
-        ctx.db.services().insert(Service {
+        ctx.db.service().insert(Service {
             id, category_id, name: name.into(),
             name_en: name_en.into(), name_vi: name_vi.into(),
             description: description_en.into(),
@@ -452,7 +452,7 @@ pub fn seed_static_data(ctx: &ReducerContext) {
 pub fn refresh_time_slots(ctx: &ReducerContext) {
     let today = epoch_ms_to_vn_date(ctx.timestamp.to_micros_since_unix_epoch() / 1000);
 
-    let salon_ids: Vec<u32> = ctx.db.salons().iter().map(|s| s.id).collect();
+    let salon_ids: Vec<u32> = ctx.db.salon().iter().map(|s| s.id).collect();
     for salon_id in salon_ids {
         for day_offset in 0u64..6 {
             let date = add_days(&today, day_offset);
@@ -461,7 +461,7 @@ pub fn refresh_time_slots(ctx: &ReducerContext) {
 
             for (slot_index, &time) in TIME_SLOTS.iter().enumerate() {
                 // Skip if slot already exists
-                let exists = ctx.db.time_slots().iter()
+                let exists = ctx.db.time_slot().iter()
                     .any(|s| s.salon_id == salon_id && s.slot_date == date && s.slot_time == time);
                 if exists { continue; }
 
@@ -470,7 +470,7 @@ pub fn refresh_time_slots(ctx: &ReducerContext) {
                 let busy = ((salon_id * 11) + (day_offset as u32 * 5) + slot_index as u32) % 9;
                 let is_available = if busy == 0 && hour >= 21 { false } else { busy > 1 };
 
-                ctx.db.time_slots().insert(TimeSlot {
+                ctx.db.time_slot().insert(TimeSlot {
                     id: 0, salon_id, slot_date: date.clone(), slot_time: time.into(),
                     is_peak, is_available,
                 });
@@ -479,12 +479,12 @@ pub fn refresh_time_slots(ctx: &ReducerContext) {
     }
 
     // Cleanup past slots
-    let to_delete: Vec<u64> = ctx.db.time_slots().iter()
+    let to_delete: Vec<u64> = ctx.db.time_slot().iter()
         .filter(|s| s.slot_date < today)
         .map(|s| s.id)
         .collect();
     for slot_id in to_delete {
-        ctx.db.time_slots().id().delete(&slot_id);
+        ctx.db.time_slot().id().delete(&slot_id);
     }
 }
 
@@ -516,12 +516,12 @@ pub fn create_booking(
     }
 
     // Validate salon
-    if ctx.db.salons().id().find(&salon_id).is_none() {
+    if ctx.db.salon().id().find(&salon_id).is_none() {
         return Err("Salon does not exist.".into());
     }
 
     // Validate stylist belongs to salon
-    let stylist_valid = ctx.db.stylists().iter()
+    let stylist_valid = ctx.db.stylist().iter()
         .any(|s| s.id == stylist_id && s.salon_id == salon_id);
     if !stylist_valid {
         return Err("Stylist does not belong to the selected salon.".into());
@@ -530,7 +530,7 @@ pub fn create_booking(
     // Validate services and sum subtotal (in cents)
     let mut subtotal: u32 = 0;
     for sid in &service_ids {
-        match ctx.db.services().id().find(sid) {
+        match ctx.db.service().id().find(sid) {
             None => return Err(format!("Service id={} does not exist.", sid)),
             Some(s) => subtotal += s.price,
         }
@@ -541,7 +541,7 @@ pub fn create_booking(
     let total_amount = subtotal + tax_amount + tip_amount;
 
     // Check slot availability
-    let slot = ctx.db.time_slots().iter()
+    let slot = ctx.db.time_slot().iter()
         .find(|s| s.salon_id == salon_id && s.slot_date == appointment_date && s.slot_time == appointment_time);
     match &slot {
         None => return Err("Time slot does not exist.".into()),
@@ -551,7 +551,7 @@ pub fn create_booking(
 
     // Mark slot unavailable
     if let Some(s) = slot {
-        ctx.db.time_slots().id().update(TimeSlot {
+        ctx.db.time_slot().id().update(TimeSlot {
             is_available: false,
             ..s
         });
@@ -559,7 +559,7 @@ pub fn create_booking(
 
     // Create booking
     let created_at = format!("{}", ctx.timestamp.to_micros_since_unix_epoch() / 1000);
-    let booking = ctx.db.bookings().insert(Booking {
+    let booking = ctx.db.booking().insert(Booking {
         id: 0,
         salon_id,
         stylist_id,
@@ -577,7 +577,7 @@ pub fn create_booking(
 
     // Create booking services
     for sid in &service_ids {
-        ctx.db.booking_services().insert(BookingService {
+        ctx.db.booking_service().insert(BookingService {
             id: 0,
             booking_id: booking.id,
             service_id: *sid,
@@ -585,7 +585,7 @@ pub fn create_booking(
     }
 
     // Insert initial booking status
-    ctx.db.booking_statuses().insert(BookingStatus {
+    ctx.db.booking_status().insert(BookingStatus {
         id: 0,
         booking_id: booking.id,
         status: "booked".into(),
@@ -601,7 +601,7 @@ pub fn update_booking_status(
     booking_id: u64,
     new_status: String,
 ) -> Result<(), String> {
-    let booking = ctx.db.bookings().id().find(&booking_id)
+    let booking = ctx.db.booking().id().find(&booking_id)
         .ok_or("Booking not found.")?;
 
     // Validate status transition
@@ -621,14 +621,14 @@ pub fn update_booking_status(
     }
 
     // Update booking
-    ctx.db.bookings().id().update(Booking {
+    ctx.db.booking().id().update(Booking {
         current_status: new_status.clone(),
         ..booking
     });
 
     // Insert status record
     let changed_at = format!("{}", ctx.timestamp.to_micros_since_unix_epoch() / 1000);
-    ctx.db.booking_statuses().insert(BookingStatus {
+    ctx.db.booking_status().insert(BookingStatus {
         id: 0,
         booking_id,
         status: new_status,
@@ -645,7 +645,7 @@ pub fn submit_feedback(
     rating: u32,
     comment: String,
 ) -> Result<(), String> {
-    let booking = ctx.db.bookings().id().find(&booking_id)
+    let booking = ctx.db.booking().id().find(&booking_id)
         .ok_or("Booking not found.")?;
 
     if rating < 1 || rating > 5 {
@@ -660,7 +660,7 @@ pub fn submit_feedback(
 
     let created_at = format!("{}", ctx.timestamp.to_micros_since_unix_epoch() / 1000);
 
-    ctx.db.feedbacks().insert(Feedback {
+    ctx.db.feedback().insert(Feedback {
         id: 0,
         booking_id,
         rating,
@@ -669,12 +669,12 @@ pub fn submit_feedback(
     });
 
     // Update status to feedback_done
-    ctx.db.bookings().id().update(Booking {
+    ctx.db.booking().id().update(Booking {
         current_status: "feedback_done".into(),
         ..booking
     });
 
-    ctx.db.booking_statuses().insert(BookingStatus {
+    ctx.db.booking_status().insert(BookingStatus {
         id: 0,
         booking_id,
         status: "feedback_done".into(),
@@ -689,20 +689,20 @@ pub fn mark_shared(
     ctx: &ReducerContext,
     booking_id: u64,
 ) -> Result<(), String> {
-    let booking = ctx.db.bookings().id().find(&booking_id)
+    let booking = ctx.db.booking().id().find(&booking_id)
         .ok_or("Booking not found.")?;
 
     if booking.current_status != "feedback_done" {
         return Err("Must have submitted feedback before sharing.".into());
     }
 
-    ctx.db.bookings().id().update(Booking {
+    ctx.db.booking().id().update(Booking {
         current_status: "shared".into(),
         ..booking
     });
 
     let changed_at = format!("{}", ctx.timestamp.to_micros_since_unix_epoch() / 1000);
-    ctx.db.booking_statuses().insert(BookingStatus {
+    ctx.db.booking_status().insert(BookingStatus {
         id: 0,
         booking_id,
         status: "shared".into(),
