@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import { fetchBootstrapData } from "./api";
+import { fetchStaticData } from "./api";
 import { BookingProvider } from "./booking-context";
 import { I18nProvider, useT, useLocale } from "./i18n/i18n-context";
 import { HomePage } from "./pages/home-page";
@@ -38,7 +38,8 @@ function AppContent() {
     setError(null);
 
     try {
-      const nextData = await fetchBootstrapData();
+      const staticData = await fetchStaticData();
+      const nextData = { ...staticData, timeSlots: [] } as BootstrapData;
       setData(nextData);
     } catch (requestError) {
       setError(

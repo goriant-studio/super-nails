@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useBooking } from "../booking-context";
@@ -10,11 +10,11 @@ import { TimeSlotButton } from "../components/TimeSlotButton";
 import { useT, useLocale } from "../i18n/i18n-context";
 import { localized } from "../locale-helpers";
 import {
-  formatAvailabilityHint,
   formatCurrency,
   formatDateLabel,
   getWeekendLabel,
 } from "../formatters";
+import { getTaxRateDisplay, TAX_RATE } from "../tax-utils";
 import {
   CalendarIcon,
   CheckIcon,
@@ -73,7 +73,6 @@ export function BookingPage() {
   const navigate = useNavigate();
 
   const {
-    data,
     selectedSalon,
     selectedStylist,
     selectedDate,
@@ -99,20 +98,18 @@ export function BookingPage() {
     clearConfirmation,
   } = useBooking();
 
-  // Redirect to success page when confirmation is set
+  // #7: Redirect to success page when confirmation is set (via useEffect, not render body)
+  useEffect(() => {
+    if (confirmation) {
+      navigate('/booking/success', { replace: true });
+    }
+  }, [confirmation, navigate]);
+
   if (confirmation) {
-    navigate('/booking/success', { replace: true });
     return null;
   }
 
   const referenceDate = availableDates[0] ?? selectedDate;
-  const nextDate = availableDates.find((date) => date !== selectedDate) ?? null;
-  const nextDateSlots = data.timeSlots.filter(
-    (slot) =>
-      slot.salonId === selectedSalon?.id &&
-      slot.date === nextDate &&
-      slot.isAvailable
-  );
   const salonDone = Boolean(selectedSalon);
   const scheduleDone = Boolean(
     selectedSalon && selectedStylist && selectedDate && selectedTime
@@ -275,9 +272,7 @@ export function BookingPage() {
                 className="flex-shrink-0 mt-0.5"
               />
               <span className="text-sm font-semibold leading-snug">
-                {nextDate
-                  ? formatAvailabilityHint(nextDateSlots.length, locale)
-                  : t("booking.no_slots")}
+                {t("booking.no_slots")}
               </span>
             </div>
 
@@ -406,7 +401,7 @@ export function BookingPage() {
               <span>{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex justify-between text-gray-500">
-              <span>{t("summary.tax", { rate: "8.875" })}</span>
+              <span>{t("summary.tax", { rate: getTaxRateDisplay(TAX_RATE) })}</span>
               <span>{formatCurrency(taxAmount)}</span>
             </div>
             {tipAmount > 0 && (

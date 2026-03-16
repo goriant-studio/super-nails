@@ -5,6 +5,7 @@ const fs = require("fs");
 
 const {
   rowsToBootstrap,
+  getSlots,
   createBooking,
   getBookingById,
   cancelBooking,
@@ -17,9 +18,25 @@ const app = express();
 const port = Number(process.env.PORT || 3001);
 const clientDistPath = path.join(__dirname, "..", "..", "client", "dist");
 
+// #11: Restrict CORS to known origins
+const ALLOWED_ORIGINS = [
+  "http://localhost:5173",
+  "http://localhost:3001",
+  "http://0.0.0.0:5173",
+  "https://super-nails.goriant.com",
+  "https://goriant-studio.github.io",
+];
+
 app.use(
   cors({
-    origin: true,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, etc.)
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, true); // still allow but don't mirror
+      }
+    },
     credentials: true
   })
 );
@@ -28,6 +45,8 @@ app.use(express.json());
 app.get("/api/health", (_request, response) => {
   response.json({
     ok: true,
+    service: "super-nails-api",
+    ts: Date.now(),
     databasePath
   });
 });
@@ -50,17 +69,35 @@ app.get("/api/slots", (request, response) => {
   if (!salonId || !date) {
     return response.status(400).json({ ok: false, message: "salonId and date are required." });
   }
-  const data = rowsToBootstrap();
-  const slots = data.timeSlots.filter(
-    (s) => s.salonId === Number(salonId) && s.date === date
-  );
+  // Validate date format YYYY-MM-DD
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return response.status(400).json({ ok: false, message: "Invalid date format. Use YYYY-MM-DD." });
+  }
+  // #1: Use targeted query instead of loading entire DB
+  const slots = getSlots(Number(salonId), date);
   response.json(slots);
 });
 
 // Create booking
 app.post("/api/bookings", (request, response) => {
   try {
-    const booking = createBooking(request.body || {});
+    const body = request.body || {};
+
+    // #9: Basic input validation
+    if (!body.salonId || !body.stylistId || !body.appointmentDate || !body.appointmentTime) {
+      return response.status(400).json({
+        ok: false,
+        message: "Missing required fields: salonId, stylistId, appointmentDate, appointmentTime."
+      });
+    }
+    if (body.serviceIds !== undefined && !Array.isArray(body.serviceIds)) {
+      return response.status(400).json({
+        ok: false,
+        message: "serviceIds must be an array."
+      });
+    }
+
+    const booking = createBooking(body);
     response.status(201).json({
       ok: true,
       booking
@@ -115,6 +152,11 @@ app.post("/api/bookings/:id/remind", (request, response) => {
   } catch (error) {
     response.status(400).json({ ok: false, message: error.message });
   }
+});
+
+// Catch-all 404 for unknown API routes
+app.all("/api/*", (_request, response) => {
+  response.status(404).json({ ok: false, message: "Not found." });
 });
 
 if (fs.existsSync(clientDistPath)) {

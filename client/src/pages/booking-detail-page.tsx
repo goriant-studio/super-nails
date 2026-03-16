@@ -12,6 +12,7 @@ import { MobileShell } from "../components/MobileShell";
 import { BellIcon, CloseIcon } from "../components/icons";
 import { useT } from "../i18n/i18n-context";
 import { formatCurrency } from "../formatters";
+import { calculateTax, TAX_RATE } from "../tax-utils";
 
 const STATUS_COLORS: Record<string, string> = {
   booked: "bg-brand-100 text-brand-700",
@@ -70,13 +71,19 @@ export function BookingDetailPage() {
       const updated = await sendReminderRequest(booking.id);
       setBooking(updated);
       setReminderJustSent(true);
-      setTimeout(() => setReminderJustSent(false), 3000);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
     } finally {
       setReminding(false);
     }
   }
+
+  // #12: Clean up setTimeout on unmount to prevent memory leak
+  useEffect(() => {
+    if (!reminderJustSent) return;
+    const timer = setTimeout(() => setReminderJustSent(false), 3000);
+    return () => clearTimeout(timer);
+  }, [reminderJustSent]);
 
   if (loading) {
     return (
@@ -173,10 +180,18 @@ export function BookingDetailPage() {
             </div>
           )}
 
-          {/* Total */}
+          {/* Total — #20: compute subtotal + tax + tip instead of raw totalAmount */}
           <div className="px-4 py-3 border-t border-gray-200 flex justify-between items-center">
             <span className="font-bold text-brand-900">{t("summary.total")}</span>
-            <span className="font-bold text-brand-700 text-lg">{formatCurrency(booking.totalAmount)}</span>
+            <span className="font-bold text-brand-700 text-lg">
+              {formatCurrency(
+                (() => {
+                  const subtotal = booking.services.reduce((sum, s) => sum + s.price, 0);
+                  const tax = calculateTax(subtotal, TAX_RATE);
+                  return subtotal + tax + (booking.tipAmount || 0);
+                })()
+              )}
+            </span>
           </div>
         </div>
 

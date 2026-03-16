@@ -478,6 +478,13 @@ function buildSlotRows() {
 }
 
 function refreshTimeSlots() {
+  // #5: Only regenerate if today's slots are missing
+  const todayKey = formatLocalDateKey(new Date());
+  const existingCount = db.prepare(
+    "SELECT COUNT(*) AS count FROM time_slots WHERE slot_date = ?"
+  ).get(todayKey).count;
+  if (existingCount > 0) return; // slots already fresh
+
   const slotRows = buildSlotRows();
   const deleteSlots = db.prepare("DELETE FROM time_slots");
   const insertSlot = db.prepare(
@@ -500,6 +507,20 @@ function refreshTimeSlots() {
   });
 
   tx();
+}
+
+// #1: Targeted slots query instead of loading entire DB
+function getSlots(salonId, date) {
+  return db.prepare(
+    `SELECT * FROM time_slots WHERE salon_id = ? AND slot_date = ?`
+  ).all(salonId, date).map(slot => ({
+    id: slot.id,
+    salonId: slot.salon_id,
+    date: slot.slot_date,
+    time: slot.slot_time,
+    isPeak: Boolean(slot.is_peak),
+    isAvailable: Boolean(slot.is_available),
+  }));
 }
 
 function initializeDatabase() {
@@ -660,35 +681,7 @@ function createBooking(payload) {
     throw new Error("Stylist không thuộc salon đã chọn.");
   }
 
-  // Validate all serviceIds exist
-  if (serviceIds.length) {
-    const services = db
-      .prepare(
-        `SELECT id, price
-         FROM services
-         WHERE id IN (${serviceIds.map(() => "?").join(",")})`
-      )
-      .all(...serviceIds);
-
-    if (services.length !== serviceIds.length) {
-      throw new Error("Một số dịch vụ không hợp lệ.");
-    }
-  }
-
-  const slot = db
-    .prepare(
-      `SELECT *
-       FROM time_slots
-       WHERE salon_id = ? AND slot_date = ? AND slot_time = ?`
-    )
-    .get(salonId, appointmentDate, appointmentTime);
-
-  if (!slot || !slot.is_available) {
-    const slotError = new Error("Khung giờ này không còn trống.");
-    slotError.code = "SLOT_UNAVAILABLE";
-    throw slotError;
-  }
-
+  // #4: Validate all serviceIds exist (single query, reused below for price)
   const services = serviceIds.length
     ? db
         .prepare(
@@ -699,10 +692,29 @@ function createBooking(payload) {
         .all(...serviceIds)
     : [];
 
-  const totalAmount = services.reduce((sum, service) => sum + service.price, 0);
+  if (serviceIds.length && services.length !== serviceIds.length) {
+    throw new Error("Một số dịch vụ không hợp lệ.");
+  }
+
+  // #3: totalAmount = subtotal + tip
+  const subtotal = services.reduce((sum, service) => sum + service.price, 0);
+  const totalAmount = subtotal + tipAmount;
   const timestamp = new Date().toISOString();
 
   const transaction = db.transaction(() => {
+    // #2: Atomic slot claim — UPDATE with is_available = 1 guard
+    const slotResult = db.prepare(
+      `UPDATE time_slots SET is_available = 0
+       WHERE salon_id = ? AND slot_date = ? AND slot_time = ? AND is_available = 1`
+    ).run(salonId, appointmentDate, appointmentTime);
+
+    if (slotResult.changes === 0) {
+      throw Object.assign(
+        new Error("Khung giờ này không còn trống."),
+        { code: "SLOT_UNAVAILABLE" }
+      );
+    }
+
     const bookingResult = db
       .prepare(
         `INSERT INTO bookings (
@@ -732,12 +744,6 @@ function createBooking(payload) {
     serviceIds.forEach((serviceId) => {
       insertBookingService.run(bookingId, serviceId);
     });
-
-    db.prepare(
-      `UPDATE time_slots
-       SET is_available = 0
-       WHERE salon_id = ? AND slot_date = ? AND slot_time = ?`
-    ).run(salonId, appointmentDate, appointmentTime);
 
     return {
       bookingId: Number(bookingId),
@@ -828,12 +834,15 @@ function cancelBooking(bookingId, reason) {
        WHERE id = ?`
     ).run(new Date().toISOString(), reason || null, bookingId);
 
-    // Re-open the time slot
-    db.prepare(
-      `UPDATE time_slots
-       SET is_available = 1
-       WHERE salon_id = ? AND slot_date = ? AND slot_time = ?`
-    ).run(booking.salon_id, booking.appointment_date, booking.appointment_time);
+    // #17: Only re-open the time slot if appointment is in the future
+    const today = formatLocalDateKey(new Date());
+    if (booking.appointment_date >= today) {
+      db.prepare(
+        `UPDATE time_slots
+         SET is_available = 1
+         WHERE salon_id = ? AND slot_date = ? AND slot_time = ?`
+      ).run(booking.salon_id, booking.appointment_date, booking.appointment_time);
+    }
   });
 
   tx();
@@ -849,8 +858,13 @@ function sendReminder(bookingId) {
     throw new Error("Không thể nhắc hẹn cho booking đã hủy.");
   }
 
+  // #18: Update reminder timestamp; only change status if still 'booked'
   const now = new Date().toISOString();
-  db.prepare("UPDATE bookings SET reminder_sent_at = ?, status = 'reminded' WHERE id = ?").run(now, bookingId);
+  if (booking.status === "booked") {
+    db.prepare("UPDATE bookings SET reminder_sent_at = ?, status = 'reminded' WHERE id = ?").run(now, bookingId);
+  } else {
+    db.prepare("UPDATE bookings SET reminder_sent_at = ? WHERE id = ?").run(now, bookingId);
+  }
 
   console.log(`[reminder] Sent reminder for booking SN-${String(bookingId).padStart(4, "0")} at ${now}`);
   return getBookingById(bookingId);
@@ -892,6 +906,7 @@ initializeDatabase();
 module.exports = {
   databasePath,
   rowsToBootstrap,
+  getSlots,
   createBooking,
   getBookingById,
   cancelBooking,
