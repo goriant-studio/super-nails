@@ -1,24 +1,24 @@
 import type { Service } from "./types";
 
-const DEFAULT_SERVICE_IMAGE = "/images/services/gloss.svg";
+const DEFAULT_SERVICE_IMAGE = "/images/services/luxury-01-shine-combo-1.webp";
 
 const SERVICE_IMAGE_MAP: Record<number, string> = {
-  1: "/images/services/gloss.svg",
-  2: "/images/services/jelly.svg",
-  3: "/images/services/ritual.svg",
-  4: "/images/services/minimal.svg",
-  5: "/images/services/minimal.svg",
-  6: "/images/services/chrome.svg",
-  7: "/images/services/bridal.svg",
-  8: "/images/services/pedicure.svg",
-  9: "/images/services/pedicure-luxe.svg",
-  10: "/images/services/ritual.svg",
-  11: "/images/services/jelly.svg",
-  12: "/images/services/minimal.svg",
-  13: "/images/services/chrome.svg",
-  14: "/images/services/aura.svg",
-  15: "/images/services/pedicure-luxe.svg",
-  16: "/images/services/ritual.svg",
+  1: "/images/services/luxury-01-shine-combo-1.webp",
+  2: "/images/services/luxury-02-shine-combo-2.webp",
+  3: "/images/services/luxury-03-shine-combo-3.webp",
+  4: "/images/services/luxury-04-express-trim.webp",
+  5: "/images/services/luxury-05-soft-french-tips.webp",
+  6: "/images/services/luxury-06-cat-eye-galaxy.webp",
+  7: "/images/services/luxury-07-bridal-crystal-set.webp",
+  8: "/images/services/luxury-08-pedicure-refresh.webp",
+  9: "/images/services/luxury-09-luxury-spa-pedicure.webp",
+  10: "/images/services/luxury-10-hand-recovery-ritual.webp",
+  11: "/images/services/luxury-11-velvet-jelly-tint.webp",
+  12: "/images/services/luxury-12-bare-satin-manicure.webp",
+  13: "/images/services/luxury-13-chrome-mirror-set.webp",
+  14: "/images/services/luxury-14-aura-airbrush-blend.webp",
+  15: "/images/services/luxury-15-detox-pedicure-therapy.webp",
+  16: "/images/services/luxury-16-collagen-hand-foot-ritual.webp",
 };
 
 export function getServiceImage(service: Service): string {
