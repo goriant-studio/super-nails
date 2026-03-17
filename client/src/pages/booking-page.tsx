@@ -7,7 +7,7 @@ import { MobileShell } from "../components/MobileShell";
 import { PaymentSection } from "../components/payment-section";
 import { TipSelector } from "../components/tip-selector";
 import { TimeSlotButton } from "../components/TimeSlotButton";
-import { useT, useLocale } from "../i18n/i18n-context";
+import { useT, useLocale } from "../i18n/i18n-hooks";
 import { localized } from "../locale-helpers";
 import {
   formatCurrency,

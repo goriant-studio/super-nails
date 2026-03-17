@@ -42,6 +42,8 @@ Priorities:
 ## Important Files
 
 - `client/src/App.tsx`
+- `client/src/api.ts`
+- `client/src/i18n/i18n-context.tsx`
 - `client/src/booking-context.tsx`
 - `client/src/pages/home-page.tsx`
 - `client/src/pages/booking-page.tsx`
@@ -56,30 +58,28 @@ Priorities:
 - `client/src/global.css`
 - `server/src/index.js`
 - `server/src/db.js`
-- `AGENTS.sh`
+- `e2e/api.spec.ts`
+- `playwright.config.ts`
+- `client/.env.example`
 - `.nvmrc`
 
 ## Commands
 
-Use the helper script when possible:
-
-```bash
-./AGENTS.sh help
-./AGENTS.sh dev
-./AGENTS.sh build
-./AGENTS.sh typecheck
-./AGENTS.sh health
-./AGENTS.sh doctor
-./AGENTS.sh repair-native
-```
-
-Direct commands:
-
 ```bash
 npm run dev
+npm run lint
+npm run typecheck
 npm run build
-npm --prefix client run typecheck
+npm start
+npm run test:e2e
 ```
+
+## Local API Defaults
+
+- Local development should default to the Express API on `http://localhost:3001`.
+- Keep `VITE_API_URL` unset for normal local work so the client uses relative `/api` requests through the Vite proxy.
+- Only use `client/.env.local` with `VITE_API_URL=...` when you intentionally want a hosted API.
+- `GET /api/static` and `GET /api/slots` are the primary read endpoints. `GET /api/bootstrap` remains a legacy compatibility endpoint.
 
 ## Node / Native Module Notes
 
@@ -96,8 +96,10 @@ On macOS, `esbuild` or `better-sqlite3` can break if dependencies were installed
 If native modules fail:
 
 ```bash
-./AGENTS.sh doctor
-./AGENTS.sh repair-native
+rm -rf node_modules client/node_modules server/node_modules
+npm install
+npm --prefix client install
+npm --prefix server install
 ```
 
 ## UX Rules For Vietnamese Users
@@ -191,44 +193,31 @@ Suggested reusable pieces:
 ## Known Gaps To Address
 
 - Keep this file in sync with the actual codebase. Outdated file maps cause bad AI edits and wrong implementation assumptions.
-- The booking API must validate that the chosen stylist belongs to the chosen salon before inserting a booking.
-- The app header back action needs a safe fallback route for direct-entry/deep-link sessions.
-- The booking header "home" action must not silently stop navigation when paired with local state cleanup.
-- Booking confirmation details are currently too coupled to live selection state and can disappear after refresh marks the slot unavailable.
-- PWA assets and service worker registration need to be safe for both root-path and subpath deployments.
-- The bottom navigation should not point to placeholder routes that mislead users.
-- The repo should pass `typecheck`, `lint`, and `build` cleanly before UI polish is considered complete.
-- The repo needs basic automated coverage for booking flow, API validation, and primary navigation states.
+- Keep the local-first dev loop green on `npm run typecheck`, `npm run lint`, `npm run build`, and `npm run test:e2e`.
+- Tour, feedback, and social-share flows still rely on local demo state and should not be expanded as if they were production-backed.
+- Backend read/write logic is still concentrated in `server/src/db.js`; avoid growing it further without tests or light refactoring.
+- Playwright coverage exists, but booking-state transitions and booking-management endpoints still need deeper regression coverage.
 - Current architecture is still MVP-level; avoid expanding fake features in the UI without backing models/routes.
 
 ## Implementation Plan
 
-### Phase 1: Stabilize Navigation, Booking State, And Critical Bugs
+### Phase 1: Keep The Local Dev Loop Reliable
 
 Goals:
-- remove misleading navigation behavior
-- prevent invalid bookings from the API
-- make direct-entry PWA flows safer
-- keep confirmation/success states reliable after live data refresh
-- remove deployment-sensitive path bugs before visual work starts
+- keep local development self-contained
+- prevent env drift between the browser, API tests, and docs
+- maintain a trustworthy green baseline before more product work
 
 Tasks:
-- Fix the interaction between `client/src/pages/booking-page.tsx` and `client/src/components/AppHeader.tsx` so the leading "home" action can clear transient state without blocking navigation.
-- Preserve a booking success snapshot in `client/src/booking-context.tsx` and/or `client/src/pages/booking-page.tsx` so the confirmation banner keeps the booked salon/date/time even after slot availability refreshes.
-- Make service worker, manifest, icon, and related client asset paths base-aware in `client/src/main.tsx`, `client/index.html`, and other affected files.
-- Fix `client/src/components/app-bottom-nav.tsx` so each tab either routes to a real screen or is clearly disabled/hidden until the feature exists.
-- Update `client/src/components/AppHeader.tsx` so `back` falls back to a safe in-app route when browser history is empty or external.
-- Add server-side validation in `server/src/db.js` to ensure `stylistId` belongs to `salonId`.
-- Return clearer API errors for invalid salon/stylist/service combinations.
-- Remove current lint blockers in `client/src/booking-context.tsx` and `client/src/main.tsx` as part of the stabilization pass.
+- Keep `VITE_API_URL` opt-in only, using `client/.env.local` for hosted API testing.
+- Keep browser routes working against the local Express API via Vite proxy when no override is present.
+- Keep API Playwright tests pointed at local Express by default, with an explicit env override for hosted targets.
+- Keep repo commands and docs aligned with the actual npm scripts that exist.
 
 Definition of done:
-- users cannot be routed to the wrong screen from the main nav
-- direct opens of `/booking`, `/salons`, or `/services` still navigate safely
-- invalid stylist/salon payloads are rejected by the server
-- booking success still shows correct confirmation details after data refresh
-- the app loads correctly from both `/` and configured Vite base paths
-- `./AGENTS.sh lint` passes alongside typecheck/build
+- local pages do not render `Unauthorized` when the repo is run without custom env overrides
+- `npm run typecheck`, `npm run lint`, `npm run build`, and `npm run test:e2e` pass
+- docs send contributors to the right commands and API targets
 
 ### Phase 2: Tighten Mobile UI Foundation
 
@@ -310,19 +299,18 @@ Definition of done:
 
 ### Suggested Execution Order
 
-1. Fix navigation, confirmation-state, deployment-path, and API validation bugs first.
-2. Make the project green on `typecheck`, `lint`, and `build`.
-3. Clean up mobile layout integrity across all primary screens.
-4. Polish Vietnamese UX copy, hierarchy, and states.
-5. Improve salon/service discovery screens.
-6. Add validation and tests before expanding feature scope.
+1. Keep the local dev loop green and env/docs aligned.
+2. Clean up mobile layout integrity across all primary screens.
+3. Polish Vietnamese UX copy, hierarchy, and states.
+4. Improve salon/service discovery screens.
+5. Add validation and tests before expanding feature scope.
 
 ### Verification Gates
 
 Run before closing any UI/bugfix pass:
-- `./AGENTS.sh typecheck`
-- `./AGENTS.sh lint`
-- `./AGENTS.sh build`
+- `npm run typecheck`
+- `npm run lint`
+- `npm run build`
 
 Manual QA checklist:
 - verify `/`, `/booking`, `/salons`, and `/services` on 375px, 390px, and 412px widths

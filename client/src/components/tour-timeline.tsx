@@ -1,4 +1,4 @@
-import { useT } from "../i18n/i18n-context";
+import { useT } from "../i18n/i18n-hooks";
 import { isStatusReached, type TourStatus } from "../tour-status";
 
 interface TourTimelineProps {

@@ -1,28 +1,17 @@
 import {
-  createContext,
   useCallback,
-  useContext,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
 
 import en from "./en.json";
+import { I18nContext, type Locale } from "./i18n-store";
 import vi from "./vi.json";
-
-export type Locale = "en" | "vi";
 
 const LOCALE_KEY = "super-nails-locale";
 
 const translations: Record<Locale, Record<string, string>> = { en, vi };
-
-interface I18nContextValue {
-  locale: Locale;
-  setLocale: (locale: Locale) => void;
-  t: (key: string, params?: Record<string, string | number>) => string;
-}
-
-const I18nContext = createContext<I18nContextValue | null>(null);
 
 function getInitialLocale(): Locale {
   try {
@@ -67,16 +56,4 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   return (
     <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
   );
-}
-
-export function useT() {
-  const ctx = useContext(I18nContext);
-  if (!ctx) throw new Error("useT must be used inside I18nProvider.");
-  return ctx.t;
-}
-
-export function useLocale() {
-  const ctx = useContext(I18nContext);
-  if (!ctx) throw new Error("useLocale must be used inside I18nProvider.");
-  return { locale: ctx.locale, setLocale: ctx.setLocale };
 }

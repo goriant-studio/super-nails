@@ -24,7 +24,7 @@ test.describe("Home page", () => {
   });
 
   test("Book Now / Đặt lịch link navigates to /booking", async ({ page }) => {
-    const bookLink = page.getByRole("link", { name: /book|đặt lịch|cta/i }).first();
+    const bookLink = page.locator("a[href='/booking']").first();
     await expect(bookLink).toBeVisible();
     await bookLink.click();
     await expect(page).toHaveURL(/\/booking/);

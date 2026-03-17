@@ -10,7 +10,7 @@ import {
 import { AppHeader } from "../components/AppHeader";
 import { MobileShell } from "../components/MobileShell";
 import { BellIcon, CloseIcon } from "../components/icons";
-import { useT } from "../i18n/i18n-context";
+import { useT } from "../i18n/i18n-hooks";
 import { formatCurrency } from "../formatters";
 import { calculateTax, TAX_RATE } from "../tax-utils";
 

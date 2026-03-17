@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { formatCurrency } from "../formatters";
-import { useT } from "../i18n/i18n-context";
+import { useT } from "../i18n/i18n-hooks";
 import { getTaxRateDisplay, TAX_RATE } from "../tax-utils";
 
 interface StickySummaryBarProps {

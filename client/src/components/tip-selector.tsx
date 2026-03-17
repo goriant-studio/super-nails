@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useBooking } from "../booking-context";
 import { formatCurrency } from "../formatters";
-import { useT } from "../i18n/i18n-context";
+import { useT } from "../i18n/i18n-hooks";
 
 const PRESETS = [
   { label: "15%", value: 15 },

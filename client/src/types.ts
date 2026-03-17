@@ -64,6 +64,7 @@ export interface Service {
   description: string;
   descriptionEn: string;
   descriptionVi: string;
+  image?: string;
   durationMinutes: number;
   /** Price in USD cents (e.g. 3000 = $30.00) */
   price: number;

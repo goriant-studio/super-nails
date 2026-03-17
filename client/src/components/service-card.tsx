@@ -1,6 +1,7 @@
 import { formatCurrency, formatDuration, toneClassName } from "../formatters";
-import { useT, useLocale } from "../i18n/i18n-context";
+import { useT, useLocale } from "../i18n/i18n-hooks";
 import { localized } from "../locale-helpers";
+import { getServiceImage } from "../service-media";
 import type { Service } from "../types";
 import { CheckIcon, ClockIcon, CloseIcon } from "./icons";
 
@@ -30,13 +31,20 @@ export function ServiceCard({
       {/* Visual area */}
       <div
         className={`relative overflow-hidden ${toneClassName(service.accent)} ${
-          isGrid ? "h-32" : "w-28 flex-shrink-0"
+          isGrid ? "h-36" : "w-32 flex-shrink-0"
         }`}
         style={{
           background: `radial-gradient(circle at top right, rgba(255,255,255,0.28), transparent 36%), linear-gradient(160deg, var(--tone-soft), var(--tone-main))`,
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
+        <img
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+          src={getServiceImage(service)}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-900/85 via-brand-900/30 to-white/10" />
 
         {/* Duration badge */}
         <span className="absolute top-2 left-2 z-10 px-2 py-1 rounded-lg bg-brand-800/80 text-white text-xs font-bold">
@@ -52,10 +60,19 @@ export function ServiceCard({
 
         {/* Tagline overlay */}
         {isGrid && localized(service, "tagline", locale) ? (
-          <p className="absolute left-3 right-3 bottom-2 z-10 text-white text-sm font-bold leading-snug line-clamp-2">
-            {localized(service, "tagline", locale)}
-          </p>
-        ) : null}
+          <div className="absolute inset-x-3 bottom-3 z-10 flex items-end justify-between gap-2">
+            <p className="max-w-[70%] text-white text-sm font-bold leading-snug line-clamp-2">
+              {localized(service, "tagline", locale)}
+            </p>
+            <span className="inline-flex rounded-lg bg-white/92 px-2.5 py-1 text-xs font-bold text-brand-900 shadow-sm">
+              {formatCurrency(service.price)}
+            </span>
+          </div>
+        ) : (
+          <span className="absolute bottom-3 right-3 z-10 inline-flex rounded-lg bg-white/92 px-2.5 py-1 text-xs font-bold text-brand-900 shadow-sm">
+            {formatCurrency(service.price)}
+          </span>
+        )}
       </div>
 
       {/* Body */}
@@ -63,6 +80,12 @@ export function ServiceCard({
         <h3 className="font-heading text-sm font-bold text-brand-900 leading-snug line-clamp-2">
           {localized(service, "name", locale)}
         </h3>
+
+        {!isGrid && localized(service, "tagline", locale) ? (
+          <p className="text-xs font-semibold text-brand-600 line-clamp-2">
+            {localized(service, "tagline", locale)}
+          </p>
+        ) : null}
 
         <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
           {localized(service, "description", locale)}
@@ -72,11 +95,11 @@ export function ServiceCard({
         <div className="flex items-center justify-between gap-2 mt-auto">
           <span className="inline-flex items-center gap-1 text-xs text-gray-400">
             <ClockIcon width={13} height={13} />
-            {service.durationMinutes} min
+            {formatDuration(service.durationMinutes)}
           </span>
-          <strong className="text-sm font-bold text-brand-700">
-            {formatCurrency(service.price)}
-          </strong>
+          <span className="text-xs font-medium text-gray-400 line-clamp-1 text-right">
+            {localized(service, "badge", locale) || localized(service, "tagline", locale)}
+          </span>
         </div>
 
         {/* Select / Deselect button */}

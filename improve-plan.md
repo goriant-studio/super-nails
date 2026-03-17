@@ -50,7 +50,7 @@
 
 ## Test plan
 
-- Checks bắt buộc: `./AGENTS.sh typecheck`, `./AGENTS.sh lint`, `./AGENTS.sh build`.
+- Checks bắt buộc: `npm run typecheck`, `npm run lint`, `npm run build`.
 - Manual QA:
   - Mở trực tiếp `/`, `/booking`, `/salons`, `/services` và test nút back/home từ session mới.
   - Đặt lịch thành công rồi verify banner vẫn hiện đúng salon, ngày và giờ sau khi slot bị refresh thành unavailable.

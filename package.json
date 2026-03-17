@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "concurrently -n web,api -c blue,green \"npm --prefix client run dev -- --host\" \"npm --prefix server run dev\"",
     "build": "npm --prefix client run build && npm --prefix server run build",
+    "lint": "npm --prefix client run lint",
     "start": "npm --prefix server run start",
+    "typecheck": "npm --prefix client run typecheck",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report"

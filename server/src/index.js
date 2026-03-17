@@ -20,6 +20,8 @@ const clientDistPath = path.join(__dirname, "..", "..", "client", "dist");
 
 // #11: Restrict CORS to known origins
 const ALLOWED_ORIGINS = [
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:3001",
   "http://localhost:5173",
   "http://localhost:3001",
   "http://0.0.0.0:5173",
