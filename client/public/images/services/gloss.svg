@@ -1,0 +1,26 @@
+<svg width="440" height="320" viewBox="0 0 440 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="32" y1="24" x2="388" y2="280" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10234E"/>
+      <stop offset="1" stop-color="#6E9CFF"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="120" y1="126" x2="312" y2="248" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD8C3"/>
+      <stop offset="1" stop-color="#F4AF98"/>
+    </linearGradient>
+    <linearGradient id="polish" x1="92" y1="120" x2="334" y2="252" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF4E8"/>
+      <stop offset="1" stop-color="#B9D0FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="440" height="320" rx="32" fill="url(#bg)"/>
+  <circle cx="79" cy="78" r="60" fill="#FFFFFF" fill-opacity="0.1"/>
+  <circle cx="360" cy="68" r="72" fill="#8AB1FF" fill-opacity="0.18"/>
+  <path d="M68 248C118 182 180 144 252 122C286 112 316 110 346 118C364 123 372 144 362 160C338 194 286 234 206 268L96 292C66 298 50 274 68 248Z" fill="url(#skin)"/>
+  <rect x="192" y="136" width="42" height="90" rx="20" transform="rotate(-20 192 136)" fill="#FFC6D5"/>
+  <rect x="242" y="124" width="38" height="82" rx="18" transform="rotate(-12 242 124)" fill="#FCE7F3"/>
+  <rect x="286" y="136" width="34" height="76" rx="16" transform="rotate(2 286 136)" fill="#DCEBFF"/>
+  <path d="M88 224C156 158 228 132 320 146" stroke="url(#polish)" stroke-width="14" stroke-linecap="round" stroke-opacity="0.65"/>
+  <path d="M252 58C280 74 302 100 316 136" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" stroke-opacity="0.42"/>
+  <circle cx="318" cy="236" r="14" fill="#FFFFFF" fill-opacity="0.26"/>
+</svg>

@@ -4,7 +4,7 @@ import { useBooking } from "../booking-context";
 import { AppHeader } from "../components/AppHeader";
 import { MobileShell } from "../components/MobileShell";
 import { CheckIcon } from "../components/icons";
-import { useT } from "../i18n/i18n-context";
+import { useT } from "../i18n/i18n-hooks";
 import { formatCurrency } from "../formatters";
 import { getTaxRateDisplay, TAX_RATE } from "../tax-utils";
 

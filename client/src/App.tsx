@@ -3,7 +3,8 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { fetchStaticData } from "./api";
 import { BookingProvider } from "./booking-context";
-import { I18nProvider, useT, useLocale } from "./i18n/i18n-context";
+import { I18nProvider } from "./i18n/i18n-context";
+import { useT, useLocale } from "./i18n/i18n-hooks";
 import { HomePage } from "./pages/home-page";
 import { BookingPage } from "./pages/booking-page";
 import { SuccessPage } from "./pages/success-page";

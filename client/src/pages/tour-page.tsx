@@ -5,7 +5,7 @@ import { MobileShell } from "../components/MobileShell";
 import { TourTimeline } from "../components/tour-timeline";
 import { FeedbackForm } from "../components/feedback-form";
 import { SocialShare } from "../components/social-share";
-import { useT } from "../i18n/i18n-context";
+import { useT } from "../i18n/i18n-hooks";
 import { formatCurrency } from "../formatters";
 import type { TourStatus } from "../tour-status";
 import { isStatusReached } from "../tour-status";
@@ -57,7 +57,7 @@ export function TourPage() {
     }
   }
 
-  function handleFeedback(rating: number, _comment: string) {
+  function handleFeedback(rating: number) {
     setFeedbackRating(rating);
     setFeedbackSubmitted(true);
     setCurrentStatus("feedback_done");

@@ -1,5 +1,5 @@
 import { useBooking } from "../booking-context";
-import { useT } from "../i18n/i18n-context";
+import { useT } from "../i18n/i18n-hooks";
 import type { PaymentMethod } from "../types";
 
 const METHODS: { key: PaymentMethod; icon: string }[] = [

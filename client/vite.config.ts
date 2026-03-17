@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-export default defineConfig(({ command }) => ({
+export default defineConfig(() => ({
   base: "/",
   plugins: [react()],
   server: {
@@ -9,7 +9,7 @@ export default defineConfig(({ command }) => ({
     port: 5173,
     proxy: {
       // Proxy all API endpoints to Express server
-      "/api": { target: "http://localhost:3001", changeOrigin: true },
+      "/api": { target: "http://127.0.0.1:3001", changeOrigin: true },
     }
   }
 }));

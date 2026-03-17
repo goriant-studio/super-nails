@@ -184,7 +184,10 @@ export function BookingProvider({
   const availableStylists = data.stylists.filter(
     (stylist) => stylist.salonId === selectedSalonId
   );
-  const availableDates = selectedSalonId ? getNextSixDates() : [];
+  const availableDates = useMemo(
+    () => (selectedSalonId ? getNextSixDates() : []),
+    [selectedSalonId]
+  );
   const selectedStylist =
     availableStylists.find((stylist) => stylist.id === selectedStylistId) ?? null;
   const selectedServices = data.services.filter((service) =>

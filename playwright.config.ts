@@ -9,7 +9,7 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
 
   use: {
-    baseURL: "http://localhost:5173",
+    baseURL: "http://127.0.0.1:5173",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
@@ -25,13 +25,13 @@ export default defineConfig({
   webServer: [
     {
       command: "node server/src/index.js",
-      url: "http://localhost:3001/api/health",
+      url: "http://127.0.0.1:3001/api/health",
       reuseExistingServer: !process.env.CI,
       timeout: 30_000,
     },
     {
       command: "npm --prefix client run dev -- --host",
-      url: "http://localhost:5173",
+      url: "http://127.0.0.1:5173",
       reuseExistingServer: !process.env.CI,
       timeout: 30_000,
     },

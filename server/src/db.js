@@ -115,10 +115,68 @@ function createTables() {
   `);
 }
 
+function syncServiceCatalog(categories, services) {
+  const upsertCategory = db.prepare(
+    `INSERT INTO service_categories (id, slug, name, teaser)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET
+       slug = excluded.slug,
+       name = excluded.name,
+       teaser = excluded.teaser`
+  );
+  const upsertService = db.prepare(
+    `INSERT INTO services (
+      id, category_id, name, description, duration_minutes, price, badge, accent, tagline
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      category_id = excluded.category_id,
+      name = excluded.name,
+      description = excluded.description,
+      duration_minutes = excluded.duration_minutes,
+      price = excluded.price,
+      badge = excluded.badge,
+      accent = excluded.accent,
+      tagline = excluded.tagline`
+  );
+
+  db.transaction(() => {
+    categories.forEach((row) => upsertCategory.run(...row));
+    services.forEach((row) => upsertService.run(...row));
+  })();
+}
+
 function seedStaticData() {
   const provinceCount = db.prepare("SELECT COUNT(*) AS count FROM provinces").get().count;
 
+  const categories = [
+    [1, "combo-moi", "Combo mới và hot", "Những gói đang được đặt nhiều trong tuần"],
+    [2, "nail-co-ban", "Nail cơ bản", "Cắt da, sơn gel và design nhẹ cho lịch hẹn nhanh"],
+    [3, "nail-art", "Nail art và premium", "Builder gel, charm đá và bộ sưu tập đẹp sang"],
+    [4, "pedicure", "Pedicure và chăm sóc", "Làm sạch, massage và dưỡng ẩm chân"],
+    [5, "spa", "Spa thư giãn", "Massage tay chân và phục hồi da"]
+  ];
+
+  const services = [
+    [1, 1, "Shine Combo 1", "Cắt da, sơn gel một màu và massage tay 10 phút.", 45, 2500, "Đồng giá cuối tuần", "cobalt", "Nhanh, gọn và dễ đặt lịch"],
+    [2, 1, "Shine Combo 2", "Cắt da, sơn gel, chăm sóc cuticle và đắp mặt nạ tay.", 60, 4000, "Mới", "violet", "Combo dễ chốt lịch nhiều nhất"],
+    [3, 1, "Shine Combo 3", "Builder gel tự nhiên, massage cổ vai và phụ kiện nhẹ.", 75, 5500, "Premium", "emerald", "Đi kèm thư giãn cổ vai gáy"],
+    [4, 2, "Cắt xả express", "Cắt da nhanh, dưỡng móng và sơn dưỡng bóng.", 30, 1800, null, "sunrise", "Phù hợp lịch hẹn 30 phút"],
+    [5, 2, "French tip soft", "Nền gel trong và vẽ French tip tay cong mềm.", 40, 3000, null, "cobalt", "Classic nhưng vẫn rất sang"],
+    [6, 3, "Cat eye galaxy", "Sơn gel cat eye nhiều lớp và hiệu ứng ánh kim.", 55, 3500, "Hot trend", "violet", "Lên ảnh đẹp trên iPhone"],
+    [7, 3, "Bridal crystal set", "Bộ nail cưới với charm đá, line art và builder gel.", 90, 7500, "Premium", "gold", "Dành cho ngày đặc biệt"],
+    [8, 4, "Pedicure refresh", "Làm sạch góc chân, tẩy da chết và sơn gel chân.", 50, 3200, null, "emerald", "Chân nhẹ và sạch sẽ hơn"],
+    [9, 4, "Luxury spa pedicure", "Pedicure có massage đá nóng, muối ngâm và serum phục hồi.", 65, 4800, "Thư giãn", "sand", "Rất hợp cho cuối tuần"],
+    [10, 5, "Hand recovery ritual", "Tẩy tế bào chết, massage, serum và paraffin mềm da.", 35, 2800, null, "rose", "Dưỡng ẩm và phục hồi nhanh"],
+    [11, 1, "Velvet jelly tint", "Sơn jelly trong veo, phủ top velvet và massage tinh dầu nhẹ.", 50, 3600, "Trend mới", "rose", "Hiệu ứng syrup bóng trong"],
+    [12, 2, "Bare satin manicure", "Dũa form, chăm cuticle kỹ và phủ màu nude satin mịn.", 35, 2200, null, "sand", "Tối giản nhưng rất sạch tay"],
+    [13, 3, "Chrome mirror set", "Hiệu ứng chrome gương, nền sữa và line bạc nổi bật.", 70, 5200, "Nổi bật", "cobalt", "Bắt sáng mạnh cho ảnh flash"],
+    [14, 3, "Aura airbrush blend", "Chuyển màu aura airbrush, line mảnh và lớp gel bồng nhẹ.", 80, 6100, "Mới", "violet", "Bảng màu đang viral tuần này"],
+    [15, 4, "Detox pedicure therapy", "Ngâm thảo mộc, đá nóng mini và serum phục hồi gót chân.", 75, 5600, "Phục hồi", "emerald", "Hợp chân khô và đi lại nhiều"],
+    [16, 5, "Collagen hand & foot ritual", "Ủ collagen tay chân, massage bấm huyệt và khóa ẩm bằng paraffin.", 55, 4300, "Spa", "gold", "Một lượt dưỡng trọn tay lẫn chân"]
+  ];
+
   if (provinceCount > 0) {
+    syncServiceCatalog(categories, services);
     // Update i18n fields for existing data
     updateI18nFields();
     return;
@@ -204,27 +262,6 @@ function seedStaticData() {
     [9, 4, "Bảo", "Stylist Spa", "Head spa và chăm sóc cuticle", "sand"],
     [10, 5, "Khánh", "Nghệ nhân Signature", "Box short set và nude collection", "rose"],
     [11, 6, "Hà", "Stylist Resort", "Recovery spa và premium polish", "sand"]
-  ];
-
-  const categories = [
-    [1, "combo-moi", "Combo mới và hot", "Những gói đang được đặt nhiều trong tuần"],
-    [2, "nail-co-ban", "Nail cơ bản", "Cắt da, sơn gel và design nhẹ cho lịch hẹn nhanh"],
-    [3, "nail-art", "Nail art và premium", "Builder gel, charm đá và bộ sưu tập đẹp sang"],
-    [4, "pedicure", "Pedicure và chăm sóc", "Làm sạch, massage và dưỡng ẩm chân"],
-    [5, "spa", "Spa thư giãn", "Massage tay chân và phục hồi da"]
-  ];
-
-  const services = [
-    [1, 1, "Shine Combo 1", "Cắt da, sơn gel một màu và massage tay 10 phút.", 45, 2500, "Đồng giá cuối tuần", "cobalt", "Nhanh, gọn và dễ đặt lịch"],
-    [2, 1, "Shine Combo 2", "Cắt da, sơn gel, chăm sóc cuticle và đắp mặt nạ tay.", 60, 4000, "Mới", "violet", "Combo dễ chốt lịch nhiều nhất"],
-    [3, 1, "Shine Combo 3", "Builder gel tự nhiên, massage cổ vai và phụ kiện nhẹ.", 75, 5500, "Premium", "emerald", "Đi kèm thư giãn cổ vai gáy"],
-    [4, 2, "Cắt xả express", "Cắt da nhanh, dưỡng móng và sơn dưỡng bóng.", 30, 1800, null, "sunrise", "Phù hợp lịch hẹn 30 phút"],
-    [5, 2, "French tip soft", "Nền gel trong và vẽ French tip tay cong mềm.", 40, 3000, null, "cobalt", "Classic nhưng vẫn rất sang"],
-    [6, 3, "Cat eye galaxy", "Sơn gel cat eye nhiều lớp và hiệu ứng ánh kim.", 55, 3500, "Hot trend", "violet", "Lên ảnh đẹp trên iPhone"],
-    [7, 3, "Bridal crystal set", "Bộ nail cưới với charm đá, line art và builder gel.", 90, 7500, "Premium", "gold", "Dành cho ngày đặc biệt"],
-    [8, 4, "Pedicure refresh", "Làm sạch góc chân, tẩy da chết và sơn gel chân.", 50, 3200, null, "emerald", "Chân nhẹ và sạch sẽ hơn"],
-    [9, 4, "Luxury spa pedicure", "Pedicure có massage đá nóng, muối ngâm và serum phục hồi.", 65, 4800, "Thư giãn", "sand", "Rất hợp cho cuối tuần"],
-    [10, 5, "Hand recovery ritual", "Tẩy tế bào chết, massage, serum và paraffin mềm da.", 35, 2800, null, "rose", "Dưỡng ẩm và phục hồi nhanh"]
   ];
 
   const insertProvince = db.prepare(
@@ -413,6 +450,48 @@ function updateI18nFields() {
       descVi: "Tẩy tế bào chết, massage, serum và paraffin mềm da.",
       badgeEn: null, badgeVi: null,
       tagEn: "Moisturize and recover quickly", tagVi: "Dưỡng ẩm và phục hồi nhanh",
+    },
+    11: {
+      nameEn: "Velvet Jelly Tint", nameVi: "Velvet jelly tint",
+      descEn: "Glossy jelly tint, velvet top coat, and a light aromatherapy massage.",
+      descVi: "Sơn jelly trong veo, phủ top velvet và massage tinh dầu nhẹ.",
+      badgeEn: "Fresh drop", badgeVi: "Trend mới",
+      tagEn: "Glassy syrup finish", tagVi: "Hiệu ứng syrup bóng trong",
+    },
+    12: {
+      nameEn: "Bare Satin Manicure", nameVi: "Bare satin manicure",
+      descEn: "Shape, detailed cuticle care, and a smooth satin nude finish.",
+      descVi: "Dũa form, chăm cuticle kỹ và phủ màu nude satin mịn.",
+      badgeEn: null, badgeVi: null,
+      tagEn: "Minimal and polished", tagVi: "Tối giản nhưng rất sạch tay",
+    },
+    13: {
+      nameEn: "Chrome Mirror Set", nameVi: "Chrome mirror set",
+      descEn: "Mirror chrome finish with a milky base and silver detailing.",
+      descVi: "Hiệu ứng chrome gương, nền sữa và line bạc nổi bật.",
+      badgeEn: "Spotlight", badgeVi: "Nổi bật",
+      tagEn: "Made for flash photos", tagVi: "Bắt sáng mạnh cho ảnh flash",
+    },
+    14: {
+      nameEn: "Aura Airbrush Blend", nameVi: "Aura airbrush blend",
+      descEn: "Aura airbrush blending with delicate linework and soft gel volume.",
+      descVi: "Chuyển màu aura airbrush, line mảnh và lớp gel bồng nhẹ.",
+      badgeEn: "New", badgeVi: "Mới",
+      tagEn: "The color blend trending this week", tagVi: "Bảng màu đang viral tuần này",
+    },
+    15: {
+      nameEn: "Detox Pedicure Therapy", nameVi: "Detox pedicure therapy",
+      descEn: "Herbal soak, mini hot stone massage, and heel recovery serum.",
+      descVi: "Ngâm thảo mộc, đá nóng mini và serum phục hồi gót chân.",
+      badgeEn: "Recovery", badgeVi: "Phục hồi",
+      tagEn: "Ideal after long days on your feet", tagVi: "Hợp chân khô và đi lại nhiều",
+    },
+    16: {
+      nameEn: "Collagen Hand & Foot Ritual", nameVi: "Collagen hand & foot ritual",
+      descEn: "Collagen wrap for hands and feet, pressure-point massage, and paraffin seal.",
+      descVi: "Ủ collagen tay chân, massage bấm huyệt và khóa ẩm bằng paraffin.",
+      badgeEn: "Spa", badgeVi: "Spa",
+      tagEn: "One session for hands and feet", tagVi: "Một lượt dưỡng trọn tay lẫn chân",
     },
   };
 

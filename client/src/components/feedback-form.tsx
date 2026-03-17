@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useT } from "../i18n/i18n-context";
+import { useT } from "../i18n/i18n-hooks";
 
 interface FeedbackFormProps {
   onSubmit: (rating: number, comment: string) => void;
