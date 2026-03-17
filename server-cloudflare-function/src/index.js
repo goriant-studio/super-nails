@@ -137,11 +137,22 @@ async function stdbReduce(env, reducer, args) {
       body: JSON.stringify(args),
     }
   );
+  const text = await resp.text();
+
   if (!resp.ok) {
-    const text = await resp.text();
     throw new Error(text || `STDB reducer error ${resp.status}`);
   }
-  return resp.json();
+
+  // Spacetime reducers can succeed with an empty body, so treat that as success.
+  if (!text.trim()) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
 }
 
 // ─── Slot generation (JS fallback, mirrors db.js busy pattern) ─────────────
